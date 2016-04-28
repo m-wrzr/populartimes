@@ -4,6 +4,7 @@ from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 import re
 import json
+import os
 
 # setup
 # searchterms are location dependent!!
@@ -28,12 +29,10 @@ def getsingleday(weekday, timebars):
                 " Uhr"))
 
         # update time if no label there
-        # TODO broken if first is not labeled
-        if len(rel_time) == 0:
-            if ":20" in time_json[j - 1]["time"]:
-                rel_time = time_json[j - 2]["time"] + ":40"
-            else:
-                rel_time = time_json[j - 1]["time"] + ":20"
+        if len(rel_time) == 0 and not all(tmp["time"] == "" for tmp in time_json):
+            rel_time = (int(time_json[j - 1]["time"]) + 1) % 24
+
+        rel_time = int(rel_time)
 
         time_json.append({"time": rel_time, "popularity": rel_pop})
 
@@ -77,6 +76,9 @@ for searchterm in searchterms:
 
     json_weekly = json.dumps(pop_weekly, indent=4, sort_keys=True)
 
-    # write to json
-    with open("{}.json".format(searchterm), "w") as json_file:
-        json_file.write(json_weekly)
+    # write to file
+    filename = "data/{}.json".format(searchterm)
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+    with open(filename, "w") as file:
+        file.write(json_weekly)
