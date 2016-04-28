@@ -2,4 +2,4 @@
 
 exploring google maps popular times data
 
-includes crawler and exploratory analysis
+includes crawler and exploratory analysis (later)
