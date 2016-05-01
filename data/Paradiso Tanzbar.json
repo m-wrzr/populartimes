@@ -1,0 +1,249 @@
+{
+    "address": "Rumfordstra\u00dfe 2, 80469 M\u00fcnchen, Germany",
+    "location": {
+        "location": {
+            "lat": 48.1332081,
+            "lng": 11.574893
+        }
+    },
+    "name": "Paradiso Tanzbar",
+    "place_id": "ChIJm6FyQWDfnUcRgqmQ_g-8VKU",
+    "popular_times": [
+        {
+            "data": [],
+            "weekday": "Sunday",
+            "weekday_num": 6
+        },
+        {
+            "data": [],
+            "weekday": "Monday",
+            "weekday_num": 0
+        },
+        {
+            "data": [],
+            "weekday": "Tuesday",
+            "weekday_num": 1
+        },
+        {
+            "data": [],
+            "weekday": "Wednesday",
+            "weekday_num": 2
+        },
+        {
+            "data": [],
+            "weekday": "Thursday",
+            "weekday_num": 3
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 0,
+                    "time": 13
+                },
+                {
+                    "popularity": 0,
+                    "time": 14
+                },
+                {
+                    "popularity": 0,
+                    "time": 15
+                },
+                {
+                    "popularity": 0,
+                    "time": 16
+                },
+                {
+                    "popularity": 0,
+                    "time": 17
+                },
+                {
+                    "popularity": 0,
+                    "time": 18
+                },
+                {
+                    "popularity": 0,
+                    "time": 19
+                },
+                {
+                    "popularity": 0,
+                    "time": 20
+                },
+                {
+                    "popularity": 0,
+                    "time": 21
+                },
+                {
+                    "popularity": 10,
+                    "time": 22
+                },
+                {
+                    "popularity": 26,
+                    "time": 23
+                },
+                {
+                    "popularity": 49,
+                    "time": 0
+                },
+                {
+                    "popularity": 50,
+                    "time": 1
+                },
+                {
+                    "popularity": 50,
+                    "time": 2
+                },
+                {
+                    "popularity": 47,
+                    "time": 3
+                },
+                {
+                    "popularity": 24,
+                    "time": 4
+                },
+                {
+                    "popularity": 7,
+                    "time": 5
+                }
+            ],
+            "weekday": "Friday",
+            "weekday_num": 4
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 0,
+                    "time": 13
+                },
+                {
+                    "popularity": 0,
+                    "time": 14
+                },
+                {
+                    "popularity": 0,
+                    "time": 15
+                },
+                {
+                    "popularity": 0,
+                    "time": 16
+                },
+                {
+                    "popularity": 0,
+                    "time": 17
+                },
+                {
+                    "popularity": 0,
+                    "time": 18
+                },
+                {
+                    "popularity": 0,
+                    "time": 19
+                },
+                {
+                    "popularity": 0,
+                    "time": 20
+                },
+                {
+                    "popularity": 0,
+                    "time": 21
+                },
+                {
+                    "popularity": 16,
+                    "time": 22
+                },
+                {
+                    "popularity": 43,
+                    "time": 23
+                },
+                {
+                    "popularity": 78,
+                    "time": 0
+                },
+                {
+                    "popularity": 100,
+                    "time": 1
+                },
+                {
+                    "popularity": 89,
+                    "time": 2
+                },
+                {
+                    "popularity": 55,
+                    "time": 3
+                },
+                {
+                    "popularity": 0,
+                    "time": 4
+                },
+                {
+                    "popularity": 0,
+                    "time": 5
+                }
+            ],
+            "weekday": "Saturday",
+            "weekday_num": 5
+        }
+    ],
+    "rating": 3,
+    "types": [
+        "bar",
+        "night_club",
+        "point_of_interest",
+        "establishment"
+    ]
+}

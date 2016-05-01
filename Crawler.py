@@ -1,83 +1,96 @@
-from selenium import webdriver
-import selenium.webdriver.support.ui as ui
-from selenium.common.exceptions import TimeoutException
-from bs4 import BeautifulSoup
-import re
+import bs4
+import calendar
+import datetime
 import json
-import os
+import re
 
-# setup
-# searchterms are location dependent!!
-searchterms = ["Gaststätte+Bergwolf", "Bosporus+Döner+München"]
-driver = webdriver.Firefox()
-wait = ui.WebDriverWait(driver, 5)
+from selenium import webdriver
+from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions
+from selenium.webdriver.common.by import By
 
-
-# return json for one day container
-def getsingleday(weekday, timebars):
-    daily = list()
-
-    for j, container in enumerate(timebars):
-
-        # get popularity from value container
-        value_container = container.find("div", class_="widget-pane-section-popular-times-value")
-        popularity = int(str(value_container).split(" ")[1].strip(
-            "aria-label=").strip("\"").strip("%"))
-
-        # get time from times label
-        label_container = container.find("div", class_="widget-pane-section-popular-times-label")
-        time = (re.sub('<[^>]+>', '', str(label_container)).strip(" Uhr"))
-
-        # update time if no label there
-        if len(time) == 0 and not all(tmp["time"] == "" for tmp in daily):
-            time = (int(daily[j - 1]["time"]) + 1) % 24
-
-        daily.append({"time": int(time), "popularity": popularity})
-
-    return {"weekday": dict_weekday(weekday),
-            "weekday_num": weekday,
-            "data": daily}
+"""Crawls Popular Times for given search term"""
 
 
-def dict_weekday(wd):
-    dic = {
-        0: "Monday",
-        1: "Tuesday",
-        2: "Wednesday",
-        3: "Thursday",
-        4: "Friday",
-        5: "Saturday",
-        6: "Sunday",
+class TimesCrawler:
+    driver = webdriver.Firefox()
+    css_keys = {
+        "value": "widget-pane-section-popular-times-value",
+        "label": "widget-pane-section-popular-times-label",
+        "container": "widget-pane-section-popular-times-graph",
+        "bar": "widget-pane-section-popular-times-bar",
+        "search": ".searchbox-searchbutton",
+        "section": ".widget-pane-section-popular-times"
     }
-    return dic[wd]
 
+    class NoPopularTimesAvailable(Exception):
+        pass
 
-for searchterm in searchterms:
+    @staticmethod
+    def format_data(ct, data):
+        numeric = (datetime.datetime.today().weekday() + ct) % 7
 
-    # load website
-    driver.get("https://www.google.de/maps/place/" + searchterm)
+        return {"weekday": calendar.day_name[numeric],
+                "weekday_num": numeric,
+                "data": data}
 
-    try:
-        wait.until(lambda l: l.find_element_by_css_selector(".searchbox-searchbutton").click())
+    def get_single_day(self, instance, timebars):
+        daily = list()
 
-    # click search button to open context view
-    except TimeoutException:
-        print("website for searchterm:\"{}\" loaded".format(searchterm))
+        for j, container in enumerate(timebars):
 
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    times_container = soup.find_all("div",
-                                    class_="widget-pane-section-popular-times-graph")
+            # get popularity from value container
+            value_container = container.find("div", class_=self.css_keys["value"])
 
-    times_weekly = []
+            try:
+                popularity = int(str(value_container)
+                                 .split(" ")[1]
+                                 .strip("aria-label=")
+                                 .strip("\"")
+                                 .strip("%"))
+            except ValueError:
+                # no info available for this day
+                return TimesCrawler.format_data(instance, [])
 
-    # iterate over weekday containers
-    for i, day in enumerate(times_container):
-        times_daily = day.find_all("div", class_="widget-pane-section-popular-times-bar")
-        times_weekly.append(getsingleday(i, times_daily))
+            # get time from times label
+            label_container = container.find("div", class_=self.css_keys["label"])
+            time = re.sub("<[^>]+>", "", str(label_container)).strip(" Uhr")
 
-    # write to file
-    filename = "data/{}.json".format(searchterm)
-    os.makedirs(os.path.dirname(filename), exist_ok=True)
+            # TODO crashes if starting time has no label
+            # update time if no label there
+            if len(time) == 0 and not all(tmp["time"] == "" for tmp in daily):
+                time = (int(daily[j - 1]["time"]) + 1) % 24
 
-    with open(filename, "w") as file:
-        file.write(json.dumps(times_weekly, indent=4, sort_keys=True))
+            daily.append({"time": int(time), "popularity": popularity})
+
+        return TimesCrawler.format_data(instance, daily)
+
+    def get_popular_times(self, searchterm):
+
+        self.driver.get("https://www.google.de/maps/place/{}".format(searchterm))
+
+        try:
+            # wait for searchbox
+            WebDriverWait(self.driver, 5).until(
+                expected_conditions.presence_of_element_located((By.CSS_SELECTOR, self.css_keys["search"])))
+            self.driver.find_element_by_css_selector(self.css_keys["search"]).click()
+
+            # wait for popular times section
+            WebDriverWait(self.driver, 10).until(
+                expected_conditions.presence_of_element_located((By.CSS_SELECTOR, self.css_keys["section"])))
+
+        except TimeoutException:
+            raise TimesCrawler.NoPopularTimesAvailable
+
+        soup = bs4.BeautifulSoup(self.driver.page_source, 'html.parser')
+        times_container = soup.find_all("div", class_=self.css_keys["container"])
+
+        times_weekly = []
+
+        # iterate over weekday containers
+        for i, day in enumerate(times_container):
+            times_daily = day.find_all("div", class_=self.css_keys["bar"])
+            times_weekly.append(TimesCrawler.get_single_day(self, i, times_daily))
+
+        return json.dumps(times_weekly, indent=4, sort_keys=True)
