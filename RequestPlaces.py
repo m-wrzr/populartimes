@@ -9,50 +9,54 @@ with open("params.json", "r") as params_file:
     crawler = Crawler.TimesCrawler()
 
     # get all bars (up to 200) in a radius of 500 meters around coordinates (Gärtnerplatz)
-    radarSearch = "https://maps.googleapis.com/maps/api/place/radarsearch/" \
-                  "json?location={},{}&radius={}&types={}&key={}".format(params["lat"], params["lng"], params["radius"],
-                                                                         "|".join(params["types"]), params["API_key"])
 
-    try:
-        places = json.loads(requests.get(radarSearch, auth=('user', 'pass')).text)["results"]
-        nAvailable = 0
+    for l in params["locations"]:
 
-        for place in places:
-            placeRequest = "https://maps.googleapis.com/maps/api/place/details/" \
-                           "json?placeid={}&key={}".format(place["place_id"], params["API_key"])
-            detail = json.loads(requests.get(placeRequest, auth=('user', 'pass')).text)["result"]
+        radarSearch = "https://maps.googleapis.com/maps/api/place/radarsearch/" \
+                      "json?location={},{}&radius={}&types={}&key={}".format(l["lat"], l["lng"],
+                                                                             params["radius"],
+                                                                             "|".join(params["types"]),
+                                                                             params["API_key"])
 
-            populartimes_search = "{} {}".format(detail["name"], detail["formatted_address"])
+        try:
+            places = json.loads(requests.get(radarSearch, auth=('user', 'pass')).text)["results"]
+            nAvailable = 0
 
-            print("search for {}".format(populartimes_search))
+            for place in places:
+                placeRequest = "https://maps.googleapis.com/maps/api/place/details/" \
+                               "json?placeid={}&key={}".format(place["place_id"], params["API_key"])
+                detail = json.loads(requests.get(placeRequest, auth=('user', 'pass')).text)["result"]
 
-            try:
-                times = json.loads(crawler.get_popular_times(populartimes_search))
-            except Crawler.TimesCrawler.NoPopularTimesAvailable:
-                # TODO add reliability, store unsuccessful requests and try again afterwards
-                print("No popular times available for {}".format(detail["name"]))
-                continue
+                populartimes_search = "{} {}".format(detail["name"], detail["formatted_address"])
 
-            result = {"name": detail["name"],
-                      "address": detail["formatted_address"],
-                      "location": detail["geometry"],
-                      "types": detail["types"],
-                      "place_id": detail["place_id"],
-                      "rating": detail["rating"] if "rating" in detail else -1,
-                      "popular_times": times
-                      }
+                print("search for {}".format(populartimes_search))
 
-            # write to file
-            filename = "data/{}.json".format(detail["name"])
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
+                try:
+                    times = json.loads(crawler.get_popular_times(populartimes_search))
+                except Crawler.TimesCrawler.NoPopularTimesAvailable:
+                    # TODO add reliability, store unsuccessful requests and try again afterwards
+                    print("No popular times available for {}".format(detail["name"]))
+                    continue
 
-            with open(filename, "w") as output:
-                output.write(json.dumps(result, indent=4, sort_keys=True))
+                result = {"name": detail["name"],
+                          "address": detail["formatted_address"],
+                          "location": detail["geometry"],
+                          "types": detail["types"],
+                          "place_id": detail["place_id"],
+                          "rating": detail["rating"] if "rating" in detail else -1,
+                          "popular_times": times
+                          }
 
-            nAvailable += 1
+                # write to file
+                filename = "data/{}.json".format(detail["name"])
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
 
-        print("#places:{} #popularTimes:{}".format(len(places), nAvailable))
+                with open(filename, "w") as output:
+                    output.write(json.dumps(result, indent=4, sort_keys=True))
 
-    except requests.exceptions.RequestException as e:
-        print(e)
-        sys.exit(1)
+                nAvailable += 1
+
+            print("#places:{} #popularTimes:{}".format(len(places), nAvailable))
+
+        except requests.exceptions.RequestException as e:
+            print(e)

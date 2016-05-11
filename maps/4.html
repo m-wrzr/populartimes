@@ -1,0 +1,303 @@
+
+        <!DOCTYPE html>
+        <head>
+            
+        
+            <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster-src.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://raw.githubusercontent.com/python-visualization/folium/master/folium/templates/leaflet.awesome.rotate.css" />
+        
+        
+        
+            
+            <style>
+
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                }
+
+            #map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+            
+        
+            
+            <style> #map_35c96a8512d44c9795074915c30b9f1a {
+                position : relative;
+                width : 100.0%;
+                height: 100.0%;
+                left: 0.0%;
+                top: 0.0%;
+                }
+            </style>
+        
+        
+        
+        </head>
+        <body>
+            
+        
+            
+            <div class="folium-map" id="map_35c96a8512d44c9795074915c30b9f1a" ></div>
+        
+        
+        
+        </body>
+        <script>
+            
+        
+            
+
+            var southWest = L.latLng(-90, -180);
+            var northEast = L.latLng(90, 180);
+            var bounds = L.latLngBounds(southWest, northEast);
+
+            var map_35c96a8512d44c9795074915c30b9f1a = L.map('map_35c96a8512d44c9795074915c30b9f1a', {
+                                           center:[48.131776,11.576037],
+                                           zoom: 15,
+                                           maxBounds: bounds,
+                                           layers: [],
+                                           crs: L.CRS.EPSG3857
+                                         });
+            
+        
+        
+            
+            var tile_layer_1fb8166ed43f45c2967b67bca6c83345 = L.tileLayer(
+                'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
+                {
+                    maxZoom: 18,
+                    minZoom: 1,
+                    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                    detectRetina: false
+                    }
+                ).addTo(map_35c96a8512d44c9795074915c30b9f1a);
+
+        
+        
+            
+
+            var circle_marker_671131e4b14c4fd1995b753b6b5b8b0c = L.circle(
+                [48.1376084,11.5644007],
+                16,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_35c96a8512d44c9795074915c30b9f1a);
+            
+        
+            
+            var popup_e509eea146db4361939503b3913aaa8d = L.popup({maxWidth: '300'});
+
+            
+                var html_7cf911755d8c42f1b76df602be0ecdf7 = $('         <div id="html_7cf911755d8c42f1b76df602be0ecdf7"                 style="width: 100.0%; height: 100.0%;">                 Harry Klein</div>                 ')[0];
+                popup_e509eea146db4361939503b3913aaa8d.setContent(html_7cf911755d8c42f1b76df602be0ecdf7);
+            
+
+            circle_marker_671131e4b14c4fd1995b753b6b5b8b0c.bindPopup(popup_e509eea146db4361939503b3913aaa8d);
+
+            
+        
+        
+            
+
+            var circle_marker_e7f3413b30cb4723abd261c64a7b9683 = L.circle(
+                [48.140844,11.567257],
+                0,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_35c96a8512d44c9795074915c30b9f1a);
+            
+        
+            
+            var popup_ad62d9ccb84c4a7d85f7d09957feef1a = L.popup({maxWidth: '300'});
+
+            
+                var html_73233806dd684f73b38021331a8dd1e4 = $('         <div id="html_73233806dd684f73b38021331a8dd1e4"                 style="width: 100.0%; height: 100.0%;">                 HEART - Restaurant &amp; Bar</div>                 ')[0];
+                popup_ad62d9ccb84c4a7d85f7d09957feef1a.setContent(html_73233806dd684f73b38021331a8dd1e4);
+            
+
+            circle_marker_e7f3413b30cb4723abd261c64a7b9683.bindPopup(popup_ad62d9ccb84c4a7d85f7d09957feef1a);
+
+            
+        
+        
+            
+
+            var circle_marker_ec7f8e8e7bd342ca92366b9c02f6650c = L.circle(
+                [48.1376687,11.5798541],
+                0,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_35c96a8512d44c9795074915c30b9f1a);
+            
+        
+            
+            var popup_444f17e1ea284b55bd1695c6c4307a83 = L.popup({maxWidth: '300'});
+
+            
+                var html_430dc6182dde4f2aaf0388195197ede3 = $('         <div id="html_430dc6182dde4f2aaf0388195197ede3"                 style="width: 100.0%; height: 100.0%;">                 Irish Pub Dubliner</div>                 ')[0];
+                popup_444f17e1ea284b55bd1695c6c4307a83.setContent(html_430dc6182dde4f2aaf0388195197ede3);
+            
+
+            circle_marker_ec7f8e8e7bd342ca92366b9c02f6650c.bindPopup(popup_444f17e1ea284b55bd1695c6c4307a83);
+
+            
+        
+        
+            
+
+            var circle_marker_1827eba2fa004e6ab4733386d17243c5 = L.circle(
+                [48.1325555,11.5730026],
+                28,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_35c96a8512d44c9795074915c30b9f1a);
+            
+        
+            
+            var popup_ecc879102ff34f40845cd7c8a37c72ba = L.popup({maxWidth: '300'});
+
+            
+                var html_a4555368912945528e907fa532802b14 = $('         <div id="html_a4555368912945528e907fa532802b14"                 style="width: 100.0%; height: 100.0%;">                 Prosecco</div>                 ')[0];
+                popup_ecc879102ff34f40845cd7c8a37c72ba.setContent(html_a4555368912945528e907fa532802b14);
+            
+
+            circle_marker_1827eba2fa004e6ab4733386d17243c5.bindPopup(popup_ecc879102ff34f40845cd7c8a37c72ba);
+
+            
+        
+        
+            
+
+            var circle_marker_c942afd1a22942a88f30b858e98d074d = L.circle(
+                [48.1319738,11.5754522],
+                22,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_35c96a8512d44c9795074915c30b9f1a);
+            
+        
+            
+            var popup_b7b62a16c6c14a4395c48c6fc440f5ed = L.popup({maxWidth: '300'});
+
+            
+                var html_572a35dd09d1400d8993301953992a80 = $('         <div id="html_572a35dd09d1400d8993301953992a80"                 style="width: 100.0%; height: 100.0%;">                 Robinson&#39;s Bar</div>                 ')[0];
+                popup_b7b62a16c6c14a4395c48c6fc440f5ed.setContent(html_572a35dd09d1400d8993301953992a80);
+            
+
+            circle_marker_c942afd1a22942a88f30b858e98d074d.bindPopup(popup_b7b62a16c6c14a4395c48c6fc440f5ed);
+
+            
+        
+        
+        
+        </script>
+        

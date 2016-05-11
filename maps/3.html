@@ -1,0 +1,411 @@
+
+        <!DOCTYPE html>
+        <head>
+            
+        
+            <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster-src.js"></script>
+        
+        
+        
+            
+        
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/leaflet.markercluster.js"></script>
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap-theme.min.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.Default.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/0.4.0/MarkerCluster.css" />
+        
+        
+        
+            
+        
+            <link rel="stylesheet" href="https://raw.githubusercontent.com/python-visualization/folium/master/folium/templates/leaflet.awesome.rotate.css" />
+        
+        
+        
+            
+            <style>
+
+            html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+                }
+
+            #map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+            
+        
+            
+            <style> #map_84226e59b0d54c31aaf07e140989e4d2 {
+                position : relative;
+                width : 100.0%;
+                height: 100.0%;
+                left: 0.0%;
+                top: 0.0%;
+                }
+            </style>
+        
+        
+        
+        </head>
+        <body>
+            
+        
+            
+            <div class="folium-map" id="map_84226e59b0d54c31aaf07e140989e4d2" ></div>
+        
+        
+        
+        </body>
+        <script>
+            
+        
+            
+
+            var southWest = L.latLng(-90, -180);
+            var northEast = L.latLng(90, 180);
+            var bounds = L.latLngBounds(southWest, northEast);
+
+            var map_84226e59b0d54c31aaf07e140989e4d2 = L.map('map_84226e59b0d54c31aaf07e140989e4d2', {
+                                           center:[48.131776,11.576037],
+                                           zoom: 15,
+                                           maxBounds: bounds,
+                                           layers: [],
+                                           crs: L.CRS.EPSG3857
+                                         });
+            
+        
+        
+            
+            var tile_layer_6b23a1e9d71540a6ab342ec4eadd9193 = L.tileLayer(
+                'https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}.png',
+                {
+                    maxZoom: 18,
+                    minZoom: 1,
+                    attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, under <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a>. Data by <a href="http://openstreetmap.org">OpenStreetMap</a>, under <a href="http://www.openstreetmap.org/copyright">ODbL</a>.',
+                    detectRetina: false
+                    }
+                ).addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+
+        
+        
+            
+
+            var circle_marker_351bb2072511483ca4ab845317eddb49 = L.circle(
+                [48.1310205,11.5747645],
+                33,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_6a4b514831d24b51ac62e08b7a4ab533 = L.popup({maxWidth: '300'});
+
+            
+                var html_654d8363597f4a279bac102db4257eae = $('         <div id="html_654d8363597f4a279bac102db4257eae"                 style="width: 100.0%; height: 100.0%;">                 Gute Nacht Wurst / Currywurst + Pommes</div>                 ')[0];
+                popup_6a4b514831d24b51ac62e08b7a4ab533.setContent(html_654d8363597f4a279bac102db4257eae);
+            
+
+            circle_marker_351bb2072511483ca4ab845317eddb49.bindPopup(popup_6a4b514831d24b51ac62e08b7a4ab533);
+
+            
+        
+        
+            
+
+            var circle_marker_caa46ea6ec3c44c1ac0cfad190614509 = L.circle(
+                [48.1376084,11.5644007],
+                25,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_e50ed5dc75094f16be6ecf35d8f8a21d = L.popup({maxWidth: '300'});
+
+            
+                var html_9a4f941318534d7caef66525a8aa4529 = $('         <div id="html_9a4f941318534d7caef66525a8aa4529"                 style="width: 100.0%; height: 100.0%;">                 Harry Klein</div>                 ')[0];
+                popup_e50ed5dc75094f16be6ecf35d8f8a21d.setContent(html_9a4f941318534d7caef66525a8aa4529);
+            
+
+            circle_marker_caa46ea6ec3c44c1ac0cfad190614509.bindPopup(popup_e50ed5dc75094f16be6ecf35d8f8a21d);
+
+            
+        
+        
+            
+
+            var circle_marker_25ae3658fb14480cad414497237d679b = L.circle(
+                [48.140844,11.567257],
+                0,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_781098dddd6b4c9ea8283c99addd130c = L.popup({maxWidth: '300'});
+
+            
+                var html_934a46ae02624cd08a9094fe3a97850b = $('         <div id="html_934a46ae02624cd08a9094fe3a97850b"                 style="width: 100.0%; height: 100.0%;">                 HEART - Restaurant &amp; Bar</div>                 ')[0];
+                popup_781098dddd6b4c9ea8283c99addd130c.setContent(html_934a46ae02624cd08a9094fe3a97850b);
+            
+
+            circle_marker_25ae3658fb14480cad414497237d679b.bindPopup(popup_781098dddd6b4c9ea8283c99addd130c);
+
+            
+        
+        
+            
+
+            var circle_marker_923c8045df0b48e788bc25b9603e5457 = L.circle(
+                [48.1376687,11.5798541],
+                3,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_cf0029d223af47bdb2ff36d7eef6a112 = L.popup({maxWidth: '300'});
+
+            
+                var html_8ed80da6da464903a2df99cc7a0c5e55 = $('         <div id="html_8ed80da6da464903a2df99cc7a0c5e55"                 style="width: 100.0%; height: 100.0%;">                 Irish Pub Dubliner</div>                 ')[0];
+                popup_cf0029d223af47bdb2ff36d7eef6a112.setContent(html_8ed80da6da464903a2df99cc7a0c5e55);
+            
+
+            circle_marker_923c8045df0b48e788bc25b9603e5457.bindPopup(popup_cf0029d223af47bdb2ff36d7eef6a112);
+
+            
+        
+        
+            
+
+            var circle_marker_cc3912566bb54bdeab664f392d717239 = L.circle(
+                [48.13075629999999,11.5699977],
+                11,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_4423e13e75824b9f9707da3ef8da1428 = L.popup({maxWidth: '300'});
+
+            
+                var html_1e9ec9e5bc884126be399e7e5803ed77 = $('         <div id="html_1e9ec9e5bc884126be399e7e5803ed77"                 style="width: 100.0%; height: 100.0%;">                 Ksar</div>                 ')[0];
+                popup_4423e13e75824b9f9707da3ef8da1428.setContent(html_1e9ec9e5bc884126be399e7e5803ed77);
+            
+
+            circle_marker_cc3912566bb54bdeab664f392d717239.bindPopup(popup_4423e13e75824b9f9707da3ef8da1428);
+
+            
+        
+        
+            
+
+            var circle_marker_7b14bde8f19c4b2f95a759ef415edeeb = L.circle(
+                [48.1302678,11.578348],
+                55,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_aa3fda7fd7b74049a833062bcfa2043a = L.popup({maxWidth: '300'});
+
+            
+                var html_5426dba9cc2a44dea1e26d5956687808 = $('         <div id="html_5426dba9cc2a44dea1e26d5956687808"                 style="width: 100.0%; height: 100.0%;">                 Netzer &amp; Overath</div>                 ')[0];
+                popup_aa3fda7fd7b74049a833062bcfa2043a.setContent(html_5426dba9cc2a44dea1e26d5956687808);
+            
+
+            circle_marker_7b14bde8f19c4b2f95a759ef415edeeb.bindPopup(popup_aa3fda7fd7b74049a833062bcfa2043a);
+
+            
+        
+        
+            
+
+            var circle_marker_0740472f44ea4bd6bf90736cbfb0d330 = L.circle(
+                [48.1325555,11.5730026],
+                24,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_1eb10c1754b94d6295a857d7037a0b44 = L.popup({maxWidth: '300'});
+
+            
+                var html_f8af79f7d56741d3b5d9ce4f5fc2eb89 = $('         <div id="html_f8af79f7d56741d3b5d9ce4f5fc2eb89"                 style="width: 100.0%; height: 100.0%;">                 Prosecco</div>                 ')[0];
+                popup_1eb10c1754b94d6295a857d7037a0b44.setContent(html_f8af79f7d56741d3b5d9ce4f5fc2eb89);
+            
+
+            circle_marker_0740472f44ea4bd6bf90736cbfb0d330.bindPopup(popup_1eb10c1754b94d6295a857d7037a0b44);
+
+            
+        
+        
+            
+
+            var circle_marker_b78f112bf434404dbf4eca006a9d2c76 = L.circle(
+                [48.13753699999999,11.5634164],
+                9,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_a601aaba02ca40ed96a61c71f064f604 = L.popup({maxWidth: '300'});
+
+            
+                var html_70f5c8f601594ced96ce37c2a2c3ef1f = $('         <div id="html_70f5c8f601594ced96ce37c2a2c3ef1f"                 style="width: 100.0%; height: 100.0%;">                 Ratchada Thai Restaurant &amp; Bar</div>                 ')[0];
+                popup_a601aaba02ca40ed96a61c71f064f604.setContent(html_70f5c8f601594ced96ce37c2a2c3ef1f);
+            
+
+            circle_marker_b78f112bf434404dbf4eca006a9d2c76.bindPopup(popup_a601aaba02ca40ed96a61c71f064f604);
+
+            
+        
+        
+            
+
+            var circle_marker_4b4742ab38424a37ad2ad29d3c5c1e53 = L.circle(
+                [48.1319738,11.5754522],
+                38,
+                {
+                    color: '#3186cc',
+                    fillColor: '#3186cc',
+                    fillOpacity: 0.6
+                    }
+                )
+                .addTo(map_84226e59b0d54c31aaf07e140989e4d2);
+            
+        
+            
+            var popup_eb8903c87b7c4f19a2df1a9fc5ee4918 = L.popup({maxWidth: '300'});
+
+            
+                var html_163dc5b0e4b3466ab1b92226eb38ce04 = $('         <div id="html_163dc5b0e4b3466ab1b92226eb38ce04"                 style="width: 100.0%; height: 100.0%;">                 Robinson&#39;s Bar</div>                 ')[0];
+                popup_eb8903c87b7c4f19a2df1a9fc5ee4918.setContent(html_163dc5b0e4b3466ab1b92226eb38ce04);
+            
+
+            circle_marker_4b4742ab38424a37ad2ad29d3c5c1e53.bindPopup(popup_eb8903c87b7c4f19a2df1a9fc5ee4918);
+
+            
+        
+        
+        
+        </script>
+        

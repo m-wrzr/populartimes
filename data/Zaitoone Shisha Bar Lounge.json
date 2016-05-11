@@ -1,0 +1,621 @@
+{
+    "address": "Schwanthalerstra\u00dfe 7, 80336 M\u00fcnchen, Germany",
+    "location": {
+        "location": {
+            "lat": 48.1373099,
+            "lng": 11.5633142
+        }
+    },
+    "name": "Zaitoone Shisha Bar Lounge",
+    "place_id": "ChIJb70Plfd1nkcRgeAJx_72jDU",
+    "popular_times": [
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 0,
+                    "time": 13
+                },
+                {
+                    "popularity": 8,
+                    "time": 14
+                },
+                {
+                    "popularity": 16,
+                    "time": 15
+                },
+                {
+                    "popularity": 20,
+                    "time": 16
+                },
+                {
+                    "popularity": 22,
+                    "time": 17
+                },
+                {
+                    "popularity": 30,
+                    "time": 18
+                },
+                {
+                    "popularity": 42,
+                    "time": 19
+                },
+                {
+                    "popularity": 62,
+                    "time": 20
+                },
+                {
+                    "popularity": 68,
+                    "time": 21
+                },
+                {
+                    "popularity": 38,
+                    "time": 22
+                },
+                {
+                    "popularity": 10,
+                    "time": 23
+                }
+            ],
+            "weekday": "Tuesday",
+            "weekday_num": 1
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 2,
+                    "time": 11
+                },
+                {
+                    "popularity": 2,
+                    "time": 12
+                },
+                {
+                    "popularity": 4,
+                    "time": 13
+                },
+                {
+                    "popularity": 8,
+                    "time": 14
+                },
+                {
+                    "popularity": 10,
+                    "time": 15
+                },
+                {
+                    "popularity": 16,
+                    "time": 16
+                },
+                {
+                    "popularity": 22,
+                    "time": 17
+                },
+                {
+                    "popularity": 32,
+                    "time": 18
+                },
+                {
+                    "popularity": 38,
+                    "time": 19
+                },
+                {
+                    "popularity": 44,
+                    "time": 20
+                },
+                {
+                    "popularity": 52,
+                    "time": 21
+                },
+                {
+                    "popularity": 54,
+                    "time": 22
+                },
+                {
+                    "popularity": 38,
+                    "time": 23
+                },
+                {
+                    "popularity": 16,
+                    "time": 0
+                },
+                {
+                    "popularity": 4,
+                    "time": 1
+                }
+            ],
+            "weekday": "Wednesday",
+            "weekday_num": 2
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 2,
+                    "time": 12
+                },
+                {
+                    "popularity": 4,
+                    "time": 13
+                },
+                {
+                    "popularity": 6,
+                    "time": 14
+                },
+                {
+                    "popularity": 12,
+                    "time": 15
+                },
+                {
+                    "popularity": 16,
+                    "time": 16
+                },
+                {
+                    "popularity": 22,
+                    "time": 17
+                },
+                {
+                    "popularity": 28,
+                    "time": 18
+                },
+                {
+                    "popularity": 36,
+                    "time": 19
+                },
+                {
+                    "popularity": 44,
+                    "time": 20
+                },
+                {
+                    "popularity": 48,
+                    "time": 21
+                },
+                {
+                    "popularity": 42,
+                    "time": 22
+                },
+                {
+                    "popularity": 28,
+                    "time": 23
+                },
+                {
+                    "popularity": 14,
+                    "time": 0
+                },
+                {
+                    "popularity": 4,
+                    "time": 1
+                }
+            ],
+            "weekday": "Thursday",
+            "weekday_num": 3
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 2,
+                    "time": 12
+                },
+                {
+                    "popularity": 0,
+                    "time": 13
+                },
+                {
+                    "popularity": 4,
+                    "time": 14
+                },
+                {
+                    "popularity": 14,
+                    "time": 15
+                },
+                {
+                    "popularity": 28,
+                    "time": 16
+                },
+                {
+                    "popularity": 34,
+                    "time": 17
+                },
+                {
+                    "popularity": 36,
+                    "time": 18
+                },
+                {
+                    "popularity": 50,
+                    "time": 19
+                },
+                {
+                    "popularity": 70,
+                    "time": 20
+                },
+                {
+                    "popularity": 72,
+                    "time": 21
+                },
+                {
+                    "popularity": 50,
+                    "time": 22
+                },
+                {
+                    "popularity": 22,
+                    "time": 23
+                },
+                {
+                    "popularity": 6,
+                    "time": 0
+                },
+                {
+                    "popularity": 2,
+                    "time": 1
+                }
+            ],
+            "weekday": "Friday",
+            "weekday_num": 4
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 8,
+                    "time": 13
+                },
+                {
+                    "popularity": 12,
+                    "time": 14
+                },
+                {
+                    "popularity": 18,
+                    "time": 15
+                },
+                {
+                    "popularity": 22,
+                    "time": 16
+                },
+                {
+                    "popularity": 28,
+                    "time": 17
+                },
+                {
+                    "popularity": 36,
+                    "time": 18
+                },
+                {
+                    "popularity": 44,
+                    "time": 19
+                },
+                {
+                    "popularity": 52,
+                    "time": 20
+                },
+                {
+                    "popularity": 52,
+                    "time": 21
+                },
+                {
+                    "popularity": 42,
+                    "time": 22
+                },
+                {
+                    "popularity": 26,
+                    "time": 23
+                },
+                {
+                    "popularity": 14,
+                    "time": 0
+                },
+                {
+                    "popularity": 6,
+                    "time": 1
+                }
+            ],
+            "weekday": "Saturday",
+            "weekday_num": 5
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 2,
+                    "time": 13
+                },
+                {
+                    "popularity": 4,
+                    "time": 14
+                },
+                {
+                    "popularity": 8,
+                    "time": 15
+                },
+                {
+                    "popularity": 14,
+                    "time": 16
+                },
+                {
+                    "popularity": 22,
+                    "time": 17
+                },
+                {
+                    "popularity": 30,
+                    "time": 18
+                },
+                {
+                    "popularity": 42,
+                    "time": 19
+                },
+                {
+                    "popularity": 60,
+                    "time": 20
+                },
+                {
+                    "popularity": 84,
+                    "time": 21
+                },
+                {
+                    "popularity": 100,
+                    "time": 22
+                },
+                {
+                    "popularity": 90,
+                    "time": 23
+                },
+                {
+                    "popularity": 60,
+                    "time": 0
+                },
+                {
+                    "popularity": 30,
+                    "time": 1
+                },
+                {
+                    "popularity": 10,
+                    "time": 2
+                }
+            ],
+            "weekday": "Sunday",
+            "weekday_num": 6
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 0,
+                    "time": 13
+                },
+                {
+                    "popularity": 2,
+                    "time": 14
+                },
+                {
+                    "popularity": 8,
+                    "time": 15
+                },
+                {
+                    "popularity": 20,
+                    "time": 16
+                },
+                {
+                    "popularity": 38,
+                    "time": 17
+                },
+                {
+                    "popularity": 56,
+                    "time": 18
+                },
+                {
+                    "popularity": 68,
+                    "time": 19
+                },
+                {
+                    "popularity": 72,
+                    "time": 20
+                },
+                {
+                    "popularity": 84,
+                    "time": 21
+                },
+                {
+                    "popularity": 96,
+                    "time": 22
+                },
+                {
+                    "popularity": 94,
+                    "time": 23
+                },
+                {
+                    "popularity": 74,
+                    "time": 0
+                },
+                {
+                    "popularity": 46,
+                    "time": 1
+                },
+                {
+                    "popularity": 22,
+                    "time": 2
+                }
+            ],
+            "weekday": "Monday",
+            "weekday_num": 0
+        }
+    ],
+    "rating": 4,
+    "types": [
+        "bar",
+        "point_of_interest",
+        "establishment"
+    ]
+}

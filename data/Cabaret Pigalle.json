@@ -1,0 +1,240 @@
+{
+    "address": "Thalkirchner Str. 23, 80337 M\u00fcnchen, Germany",
+    "location": {
+        "location": {
+            "lat": 48.12391,
+            "lng": 11.56151
+        }
+    },
+    "name": "Cabaret Pigalle",
+    "place_id": "ChIJgyBpjETfnUcRXf3OFitohzY",
+    "popular_times": [
+        {
+            "data": [],
+            "weekday": "Tuesday",
+            "weekday_num": 1
+        },
+        {
+            "data": [],
+            "weekday": "Wednesday",
+            "weekday_num": 2
+        },
+        {
+            "data": [],
+            "weekday": "Thursday",
+            "weekday_num": 3
+        },
+        {
+            "data": [],
+            "weekday": "Friday",
+            "weekday_num": 4
+        },
+        {
+            "data": [],
+            "weekday": "Saturday",
+            "weekday_num": 5
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 0,
+                    "time": 13
+                },
+                {
+                    "popularity": 0,
+                    "time": 14
+                },
+                {
+                    "popularity": 0,
+                    "time": 15
+                },
+                {
+                    "popularity": 0,
+                    "time": 16
+                },
+                {
+                    "popularity": 0,
+                    "time": 17
+                },
+                {
+                    "popularity": 0,
+                    "time": 18
+                },
+                {
+                    "popularity": 0,
+                    "time": 19
+                },
+                {
+                    "popularity": 0,
+                    "time": 20
+                },
+                {
+                    "popularity": 41,
+                    "time": 21
+                },
+                {
+                    "popularity": 72,
+                    "time": 22
+                },
+                {
+                    "popularity": 86,
+                    "time": 23
+                },
+                {
+                    "popularity": 100,
+                    "time": 0
+                },
+                {
+                    "popularity": 100,
+                    "time": 1
+                },
+                {
+                    "popularity": 61,
+                    "time": 2
+                },
+                {
+                    "popularity": 22,
+                    "time": 3
+                },
+                {
+                    "popularity": 19,
+                    "time": 4
+                }
+            ],
+            "weekday": "Sunday",
+            "weekday_num": 6
+        },
+        {
+            "data": [
+                {
+                    "popularity": 0,
+                    "time": 6
+                },
+                {
+                    "popularity": 0,
+                    "time": 7
+                },
+                {
+                    "popularity": 0,
+                    "time": 8
+                },
+                {
+                    "popularity": 0,
+                    "time": 9
+                },
+                {
+                    "popularity": 0,
+                    "time": 10
+                },
+                {
+                    "popularity": 0,
+                    "time": 11
+                },
+                {
+                    "popularity": 0,
+                    "time": 12
+                },
+                {
+                    "popularity": 0,
+                    "time": 13
+                },
+                {
+                    "popularity": 0,
+                    "time": 14
+                },
+                {
+                    "popularity": 0,
+                    "time": 15
+                },
+                {
+                    "popularity": 0,
+                    "time": 16
+                },
+                {
+                    "popularity": 0,
+                    "time": 17
+                },
+                {
+                    "popularity": 0,
+                    "time": 18
+                },
+                {
+                    "popularity": 0,
+                    "time": 19
+                },
+                {
+                    "popularity": 0,
+                    "time": 20
+                },
+                {
+                    "popularity": 52,
+                    "time": 21
+                },
+                {
+                    "popularity": 75,
+                    "time": 22
+                },
+                {
+                    "popularity": 88,
+                    "time": 23
+                },
+                {
+                    "popularity": 91,
+                    "time": 0
+                },
+                {
+                    "popularity": 80,
+                    "time": 1
+                },
+                {
+                    "popularity": 58,
+                    "time": 2
+                },
+                {
+                    "popularity": 36,
+                    "time": 3
+                },
+                {
+                    "popularity": 11,
+                    "time": 4
+                }
+            ],
+            "weekday": "Monday",
+            "weekday_num": 0
+        }
+    ],
+    "rating": -1,
+    "types": [
+        "bar",
+        "point_of_interest",
+        "establishment"
+    ]
+}

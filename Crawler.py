@@ -35,6 +35,7 @@ class TimesCrawler:
                 "weekday_num": numeric,
                 "data": data}
 
+    # read all times in first, then iterate over the list in both directions
     def get_single_day(self, instance, timebars):
         daily = list()
 
