@@ -5,16 +5,16 @@ import json
 import re
 
 from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.options import Options
 
 """Crawls Popular Times for given search term"""
 
 
 class TimesCrawler:
-    driver = webdriver.Firefox()
     css_keys = {
         "value": "widget-pane-section-popular-times-value",
         "label": "widget-pane-section-popular-times-label",
@@ -23,6 +23,19 @@ class TimesCrawler:
         "search": ".searchbox-searchbutton",
         "section": ".widget-pane-section-popular-times"
     }
+
+    # adjust depending on internet connection
+    delaySB = 3
+    delayPT = 5
+
+    # disable image loading to improve speed
+    def enableDriver(self):
+        chrome_options = Options()
+        chrome_options.add_experimental_option("prefs", {'profile.managed_default_content_settings.images': 2})
+        return webdriver.Chrome(chrome_options=chrome_options, executable_path="./chromedriver")
+
+    def __init__(self):
+        self.driver = self.enableDriver()
 
     class NoPopularTimesAvailable(Exception):
         pass
@@ -69,19 +82,31 @@ class TimesCrawler:
 
     def get_popular_times(self, searchterm):
 
-        self.driver.get("https://www.google.de/maps/place/{}".format(searchterm))
+        pageurl = "http://www.google.de/maps/place/{}".format(searchterm)
 
         try:
+            self.driver.get(pageurl)
+
+        # handle page crash after many requests
+        except WebDriverException:
+            self.driver = self.enableDriver()
+            self.driver.get(pageurl)
+
+        try:
+
             # wait for searchbox
-            WebDriverWait(self.driver, 5).until(
+            WebDriverWait(self.driver, self.delaySB).until(
                 expected_conditions.presence_of_element_located((By.CSS_SELECTOR, self.css_keys["search"])))
             self.driver.find_element_by_css_selector(self.css_keys["search"]).click()
 
             # wait for popular times section
-            WebDriverWait(self.driver, 10).until(
+            WebDriverWait(self.driver, self.delayPT).until(
                 expected_conditions.presence_of_element_located((By.CSS_SELECTOR, self.css_keys["section"])))
 
-        except TimeoutException:
+        # TODO check for more specific Exception
+        except Exception:
+            raise TimesCrawler.NoPopularTimesAvailable
+        except KeyError:
             raise TimesCrawler.NoPopularTimesAvailable
 
         soup = bs4.BeautifulSoup(self.driver.page_source, 'html.parser')
