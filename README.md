@@ -3,8 +3,8 @@ exploring google maps popular times data
 ## Requirements for RequestPlaces
 + Google Chrome WebDriver for Selenium
     https://sites.google.com/a/chromium.org/chromedriver/getting-started
-+ Get Google Maps API key
-+ Download MongoDB
++ Google Maps API key https://developers.google.com/places/web-service/?hl=de
++ MongoDB https://www.mongodb.com/
 + Add params.json
 
          {
@@ -22,3 +22,8 @@ exploring google maps popular times data
                     "dbName" : yourDbName,
                     "collectionName" : yourCollectionName
         }
+
++ Examples for created maps
+![Saturday-20](/content/5-20.png?raw=true "Saturday 20:00")
+![Saturday-21](/content/5-21.png?raw=true "Saturday 21:00")
+![Saturday-22](/content/5-22.png?raw=true "Saturday 22:00")
