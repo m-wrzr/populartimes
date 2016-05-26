@@ -1,29 +1,35 @@
 import folium
-from os import walk
 import json
 
-# TODO multiple maps at the beginning not possible, change iteration to map
+from pymongo import MongoClient
 
-for i in range(24):
-    mymap = folium.Map(location=[48.131776, 11.576037], tiles='Stamen Toner', zoom_start=15)
+params = json.loads(open("params.json", "r").read())
 
-    for (dirpath, dirnames, filenames) in walk("data"):
-        for filename in filenames:
-            if ".DS" not in filename:
-                with open(dirpath + "/" + filename) as file:
+client = MongoClient('localhost', params["dbPort"])
+database = client[params["dbName"]]
+locations = database[params["collectionName"]]
 
-                    place = json.loads(file.read().replace('\n', ''))
-                    loc = place["location"]["location"]
-                    lat = loc["lat"]
-                    lng = loc["lng"]
-                    name = place["name"]
+maps = {}
 
-                    for time in place["popular_times"]:
-                        if time["weekday"] == "Friday":
-                            for d in time["data"]:
-                                if d["time"] == i:
-                                    mymap.circle_marker(location=[lat, lng], radius=d["popularity"],
-                                                        popup=name, line_color='#3186cc',
-                                                        fill_color='#3186cc')
+# init with empty maps "day_time"
+for x, y in [(day, currT) for day in range(7) for currT in range(24)]:
+    maps["{}_{}".format(x, y)] = folium.Map(location=[48.131776, 11.576037],
+                                            tiles='Stamen Toner',
+                                            zoom_start=14)
 
-    mymap.create_map(path="maps/{}.html".format(i))
+for location in locations.find({"popular_times": {"$exists": True}}):
+
+    loc = location["location"]["location"]
+    lat = loc["lat"]
+    lng = loc["lng"]
+    name = location["name"]
+
+    for time in location["popular_times"]:
+        for day in time["data"]:
+            maps["{}_{}".format(time["weekday_num"], day["time"])] \
+                .circle_marker(location=[lat, lng], radius=day["popularity"],
+                               popup=name, line_color='#3186cc',
+                               fill_color='#3186cc')
+
+for m in maps.keys():
+    maps[m].create_map(path="maps/{}.html".format(m))

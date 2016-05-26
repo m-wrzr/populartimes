@@ -11,10 +11,13 @@ exploring google maps popular times data
                     "API_key" : "yourKey",
                     "bounds" : [
                             {"lat" : 48.123,"lng" : 10.123},
-                            {"lat" : 48.456,"lng" : 11.456}
+                            #bigger than previous
+                            {"lat" : 48.456,"lng" : 10.456}
                                 ],
+                    #between 1 and 500
                     "radius" : 180,
-                    "types" : ["bar", "restaurant"],
+                    #https://developers.google.com/places/supported_types
+                    "types" : ["bar", "restaurant"], 
                     "dbPort" : yourMongoPort,
                     "dbName" : yourDbName,
                     "collectionName" : yourCollectionName

@@ -1,10 +1,15 @@
 import json
 import requests
+import timeit
 
 from pymongo import MongoClient
 
 from scrape import Crawler
 from scrape.Util import getCoordsForBounds
+
+start_time = timeit.default_timer()
+nAvailable = 0
+nUnavailable = 0
 
 radarSearchUrl = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
 placeRequestUrl = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
@@ -50,12 +55,17 @@ with json.loads(open("params.json", "r").read()) as params:
                                           })
 
                     print("+ {}".format(searchterm))
+                    nAvailable += 1
 
                 except Crawler.TimesCrawler.NoPopularTimesAvailable:
                     locations.insert_one({"place_id": detail["place_id"]})
                     print("- {}".format(searchterm))
+                    nUnavailable += 1
                 except KeyError:
                     pass
 
         except requests.exceptions.RequestException as e:
             print(e)
+
+print("executionTime={}; nAvailable={}; nUnavailable={}"
+      .format(timeit.default_timer() - start_time, nAvailable, nUnavailable))
