@@ -24,6 +24,6 @@ exploring google maps popular times data
         }
 
 + Examples for created maps
-![Saturday-20](/content/5-20.png?raw=true "Saturday 20:00")
-![Saturday-21](/content/5-21.png?raw=true "Saturday 21:00")
-![Saturday-22](/content/5-22.png?raw=true "Saturday 22:00")
+<img src="https://raw.githubusercontent.com/m-wrzr/populartimes/content/5-20.png" width="300px">
+<img src="https://raw.githubusercontent.com/m-wrzr/populartimes/content/5-21.png" width="300px">
+<img src="https://raw.githubusercontent.com/m-wrzr/populartimes/content/5-22.png" width="300px">
