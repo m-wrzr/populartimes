@@ -24,6 +24,6 @@ exploring google maps popular times data
         }
 
 + Examples for created maps
-<img src="content/5-20.png" width="300px">
-<img src="content/5-21.png" width="300px">
-<img src="content/5-22.png" width="300px">
+<img src="https://raw.githubusercontent.com/m-wrzr/populartimes/content/5-20.png" width="300px">
+<img src="https://raw.githubusercontent.com/m-wrzr/populartimes/content/5-21.png" width="300px">
+<img src="https://raw.githubusercontent.com/m-wrzr/populartimes/content/5-22.png" width="300px">
