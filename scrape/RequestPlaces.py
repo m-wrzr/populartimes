@@ -3,7 +3,6 @@ import requests
 import timeit
 
 from pymongo import MongoClient
-
 from scrape import Crawler
 from scrape.Util import getCoordsForBounds
 

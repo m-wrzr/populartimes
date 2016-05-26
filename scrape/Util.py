@@ -16,10 +16,3 @@ def getCoordsForBounds(lower, upper):
         lower["lng"] += (0.25 / r) * (180 / math.pi) / math.cos(lower["lat"] * math.pi / 180)
 
     return coords
-
-
-def logResult(success, term):
-    if success:
-        logging.info("+ {}".format(term))
-    else:
-        logging.info("- {}".format(term))
