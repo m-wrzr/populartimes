@@ -1,26 +1,19 @@
 import json
-import requests
 import timeit
 
+import requests
 from pymongo import MongoClient
-from scrape import Crawler
-from scrape.Util import getCoordsForBounds
 
-start_time = timeit.default_timer()
-nAvailable = 0
-nUnavailable = 0
+from scrape.utils.util import get_coords
 
-radarSearchUrl = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
-placeRequestUrl = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
+from scrape.utils.scraper import BrowserScrape
 
-with json.loads(open("params.json", "r").read()) as params:
-    crawler = Crawler.TimesCrawler()
 
-    client = MongoClient('localhost', params["dbPort"])
-    database = client[params["dbName"]]
-    locations = database[params["collectionName"]]
+def load_data():
+    n_available = 0
+    n_unavailable = 0
 
-    for lat, lng in getCoordsForBounds(params["bounds"][0], params["bounds"][1]):
+    for lat, lng in get_coords(params["bounds"][0], params["bounds"][1], params["radius"]):
 
         print("\n-> [{},{}]".format(lat, lng))
 
@@ -29,9 +22,13 @@ with json.loads(open("params.json", "r").read()) as params:
 
         try:
             response = requests.get(radar, auth=('user', 'pass')).text
+            results = json.loads(response)["results"]
+
+            if len(results) > 200:
+                print("-> more than 200 places in search radius")
 
             # iterate over places which are not already in database
-            for place in (p for p in json.loads(response)["results"]
+            for place in (p for p in results
                           if locations.find_one({"place_id": p["place_id"]}) is None):
 
                 # places api - detail search
@@ -50,21 +47,36 @@ with json.loads(open("params.json", "r").read()) as params:
                                           "place_id": detail["place_id"],
                                           "rating": detail["rating"] if "rating" in detail else -1,
                                           # get populartimes from crawler
-                                          "popular_times": json.loads(crawler.get_popular_times(searchterm))
-                                          })
+                                          "popular_times": json.loads(crawler.get_popular_times(searchterm))})
 
                     print("+ {}".format(searchterm))
-                    nAvailable += 1
+                    n_available += 1
 
-                except Crawler.TimesCrawler.NoPopularTimesAvailable:
+                except BrowserScrape.NoPopularTimesAvailable:
                     locations.insert_one({"place_id": detail["place_id"]})
                     print("- {}".format(searchterm))
-                    nUnavailable += 1
+                    n_unavailable += 1
                 except KeyError:
                     pass
 
         except requests.exceptions.RequestException as e:
             print(e)
 
-print("executionTime={}; nAvailable={}; nUnavailable={}"
-      .format(timeit.default_timer() - start_time, nAvailable, nUnavailable))
+    print("executionTime={}; nAvailable={}; nUnavailable={}"
+          .format(timeit.default_timer() - start_time, n_available, n_unavailable))
+
+
+if __name__ == "__main__":
+    start_time = timeit.default_timer()
+
+    radarSearchUrl = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
+    placeRequestUrl = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
+
+    params = json.loads(open("params.json", "r").read())
+    crawler = BrowserScrape()
+
+    client = MongoClient('localhost', params["dbPort"])
+    database = client[params["dbName"]]
+    locations = database[params["collectionName"]]
+
+    load_data()

@@ -23,6 +23,9 @@ exploring google maps popular times data
                     "collectionName" : yourCollectionName
         }
 
++ execute scraping with given params "python scrape/main.py"
++ execute map creation "python create_map.py"
+
 + Examples for created maps
 ![Saturday-20](/content/5-20.png?raw=true "Saturday 20:00")
 ![Saturday-21](/content/5-21.png?raw=true "Saturday 21:00")
