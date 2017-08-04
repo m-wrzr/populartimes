@@ -1,0 +1,17 @@
+{
+  "API_key": "your-api-key", # https://developers.google.com/places/web-service/?hl=de
+  "radius": 180, # in meters, max is 180
+  "type": [
+    "bar" # https://developers.google.com/places/supported_types
+  ],
+  "bounds": {
+    "lower": { # southwest
+      "lat": 48.132986,
+      "lng": 11.566126
+    },
+    "upper": { # northeast
+      "lat": 48.142199,
+      "lng": 11.580047
+    }
+  }
+}
