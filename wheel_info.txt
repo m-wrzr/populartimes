@@ -16,9 +16,14 @@ pip3 show populartimes
 # run
 python3
 import populartimes
+
+# run with params.json
 populartimes.main()
 
 # also possible, with params as args
-populartimes.main_param({yourparams})
+populartimes.execute("your_api_key", ["bar"], (48.132986, 11.566126), (48.142199, 11.580047), 20, 180)
+
+# or simple run from init
+python3 populartimes/__init__.py
 
 # this should print out the results based on your stuff

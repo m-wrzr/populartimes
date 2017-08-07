@@ -16,7 +16,7 @@ import urllib.parse
 from queue import Queue
 
 # change for logging visibility
-logging.getLogger().setLevel(logging.INFO)
+# logging.getLogger().setLevel(logging.INFO)
 
 # urls for google api web service
 radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
@@ -29,9 +29,7 @@ user_agent = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
 
 
 # TODO prettier logging
-# TODO return result list
-# TODO pip-style packaging
-# TODO settings either via params or command line args
+# TODO return partially complete data at fails
 
 
 def get_circle_centers(lower, upper, radius):
@@ -278,6 +276,13 @@ def run():
     logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
 
 
+"""
+
+ENTRY POINTS FROM HERE
+
+"""
+
+
 def main():
     """Entry point for the application script"""
     global results
@@ -290,17 +295,46 @@ def main():
 
     run()
 
-    print(results)
+    return results
 
 
-def main_param(_params):
+def execute(api_key, types, bound_lower, bound_upper, n_threads=20, radius=180):
+    """
+    :param api_key: str; api key from google places web service
+    :param types: [str]; placetypes
+    :param bound_lower: (float, float); lat/lng of southwest point
+    :param bound_upper: (float, float); lat/lng of northeast point
+    :param n_threads: int; number of threads to call
+    :param radius: int; meters; from 1-180
+    :return:
+    """
     global results
     global g_place_ids
 
     results, g_place_ids = list(), set()
 
     global params
-    params = _params
+    params = {
+        "API_key": api_key,
+        "radius": radius,
+        "type": types,
+        "n_threads": n_threads,
+        "bounds": {
+            "lower": {
+                "lat": bound_lower[0],
+                "lng": bound_lower[1]
+            },
+            "upper": {
+                "lat": bound_upper[0],
+                "lng": bound_upper[1]
+            }
+        }
+    }
+
     run()
 
-    print(results)
+    return results
+
+
+if __name__ == "__main__":
+    print(main())
