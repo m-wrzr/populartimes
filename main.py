@@ -193,7 +193,7 @@ def get_detail(place_id):
         "coordinates": detail["geometry"]["location"]
     }
 
-    populartimes_json, days_json = {}, [[0 for _ in range(24)] for _ in range(7)]
+    populartimes_json, days_json = [], [[0 for _ in range(24)] for _ in range(7)]
 
     # get popularity for each day
     if popularity is not None:
@@ -211,9 +211,13 @@ def get_detail(place_id):
                     if hour == 23:
                         day_no = day_no % 7 + 1
 
-        populartimes_json = {
-            day_names[d]: days_json[d] for d in range(7)
-        }
+        # {"name" : "monday", "data": [...]} for each weekday as list
+        populartimes_json = [
+            {
+                "name": day_names[d],
+                "data": days_json[d]
+            } for d in range(7)
+        ]
 
     detail_json["populartimes"] = populartimes_json
 
