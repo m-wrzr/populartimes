@@ -15,7 +15,6 @@ from queue import Queue
 
 # logging.getLogger().setLevel(logging.INFO)
 
-
 radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
 detail_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
 
@@ -125,15 +124,37 @@ def get_circle_centers(lower, upper, radius):
     return coords
 
 
-def worker():
+def worker_detail():
     """
     worker that gets item of queue and starts detailed data retrieval
     :return:
     """
     while True:
-        item = q.get()
+        item = q_detail.get()
         get_data(item)
-        q.task_done()
+        q_detail.task_done()
+
+
+def worker_radar():
+    while True:
+        item = q_radar.get()
+        get_radar(item[0], item[1])
+        q_radar.task_done()
+
+
+def get_radar(lat, lng):
+    # places - radar search - https://developers.google.com/places/web-service/search?hl=de#RadarSearchRequests
+    radar_str = radar_url.format(lat, lng, params["radius"], "|".join(params["type"]), params["API_key"])
+    radar = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)["results"]
+
+    if len(radar) > 200:
+        logging.warning("more than 200 places in search radius, some data may get lost")
+
+    # retrieve google ids for detail search
+    for place in radar:
+        # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
+        if place["place_id"] not in g_place_ids:
+            g_place_ids.add(place["place_id"])
 
 
 def get_data(place_id):
@@ -210,34 +231,34 @@ if __name__ == "__main__":
         os.makedirs("data")
 
     logging.info("Adding places to queue...")
+
+    # threading for radar search
+    q_radar = Queue()
+    for i in range(params["n_threads"]):
+        t = threading.Thread(target=worker_radar)
+        t.daemon = True
+        t.start()
+
     for area in search_areas:
         for lat, lng in get_circle_centers(area[0], area[1], params["radius"]):
+            q_radar.put((lat, lng))
 
-            # places - radar search - https://developers.google.com/places/web-service/search?hl=de#RadarSearchRequests
-            radar_str = radar_url.format(lat, lng, params["radius"], "|".join(params["type"]), params["API_key"])
-            radar = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)["results"]
+    q_radar.join()
 
-            if len(radar) > 200:
-                logging.warning("more than 200 places in search radius, some data may get lost")
-
-            # retrieve google ids for detail search
-            for place in radar:
-                if place["place_id"] not in g_place_ids:
-                    g_place_ids.add(place["place_id"])
+    logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
 
     logging.info("{} places to process...".format(len(g_place_ids)))
 
-    # setup threading
-    q = Queue()
-
+    # threading for detail search and popular times
+    q_detail = Queue()
     for i in range(params["n_threads"]):
-        t = threading.Thread(target=worker)
+        t = threading.Thread(target=worker_detail)
         t.daemon = True
         t.start()
 
     for g_place_id in g_place_ids:
-        q.put(g_place_id)
+        q_detail.put(g_place_id)
 
-    q.join()
+    q_detail.join()
 
     logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
