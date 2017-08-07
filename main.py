@@ -56,51 +56,23 @@ def get_populartimes(place_identifier):
     jdata = json.loads(data)["d"]
     jdata = json.loads(jdata[4:])
 
-    info = jdata[0][1][0][14]
+    popular_times, rating, rating_n = None, None, None
 
-    # keyerror safe extraction
-    def get_index(info_d, info_index):
-        try:
-            for i in info_index:
-                info_d = info_d[i]
-            return info_d
-        except:
-            return None
+    try:
+        # get info from result array, has to be adapted if backend api changes
+        info = jdata[0][1][0][14]
 
-    popular_times = get_index(info, [84, 0])
-    rating = get_index(info, [4, 7])
-    rating_n = get_index(info, [4, 8])
+        rating = info[4][7]
+        rating_n = info[4][8]
+        popular_times = info[84][0]
+
+    # ignore, there is either no info available or no popular times
+    # TypeError: rating/rating_n/populartimes in None
+    # IndexError: info is not available
+    except (TypeError, IndexError):
+        pass
 
     return popular_times, rating, rating_n
-
-
-# TODO does this still make sense? for old jobs yes, because the work portions are smaller,
-# TODO but now? -> maybe each process works on an area
-def decrease_area():
-    """
-    separates the search space into smaller areas
-    :return: list of coordinates to be used for places api
-    """
-    bounds = params["bounds"]
-    tmp_lat, tmp_lng = bounds["lower"]["lat"], bounds["lower"]["lng"]
-
-    jobs = list()
-
-    while tmp_lat <= bounds["upper"]["lat"]:
-        while tmp_lng <= bounds["upper"]["lng"]:
-            location_start = [tmp_lat, tmp_lng]
-            location_end = [tmp_lat + 0.01, tmp_lng + 0.01]
-
-            jobs.append((location_start, location_end))
-
-            # increment along x axis
-            tmp_lng += 0.01
-
-        # increment along y axis and reset x
-        tmp_lat += 0.01
-        tmp_lng = bounds["lower"]["lng"]
-
-    return jobs
 
 
 def get_circle_centers(lower, upper, radius):
@@ -131,20 +103,24 @@ def worker_detail():
     """
     while True:
         item = q_detail.get()
-        get_data(item)
+        get_detail(item)
         q_detail.task_done()
 
 
 def worker_radar():
+    """
+      worker that gets coordinates of queue and starts radar search
+      :return:
+      """
     while True:
         item = q_radar.get()
         get_radar(item[0], item[1])
         q_radar.task_done()
 
 
-def get_radar(lat, lng):
+def get_radar(_lat, _lng):
     # places - radar search - https://developers.google.com/places/web-service/search?hl=de#RadarSearchRequests
-    radar_str = radar_url.format(lat, lng, params["radius"], "|".join(params["type"]), params["API_key"])
+    radar_str = radar_url.format(_lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"])
     radar = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)["results"]
 
     if len(radar) > 200:
@@ -157,7 +133,7 @@ def get_radar(lat, lng):
             g_place_ids.add(place["place_id"])
 
 
-def get_data(place_id):
+def get_detail(place_id):
     """
     loads data for a given area
     :return:
@@ -169,12 +145,7 @@ def get_data(place_id):
 
     searchterm = "{} {}".format(detail["name"], detail["formatted_address"])
 
-    popularity, rating, rating_n = None, None, None
-
-    try:
-        popularity, rating, rating_n = get_populartimes(searchterm)
-    except Exception as e:
-        logging.warning("Popular Times could not be loaded! Error: {}".format(e))
+    popularity, rating, rating_n = get_populartimes(searchterm)
 
     if rating is None and "rating" in detail:
         rating = detail["rating"]
@@ -211,7 +182,7 @@ def get_data(place_id):
                         day_no = day_no % 7 + 1
 
         populartimes_json = {
-            day_names[i]: days_json[i] for i in range(7)
+            day_names[d]: days_json[d] for d in range(7)
         }
 
     detail_json["populartimes"] = populartimes_json
@@ -224,7 +195,6 @@ def get_data(place_id):
 
 if __name__ == "__main__":
     start = datetime.datetime.now()
-    search_areas = decrease_area()
     results, g_place_ids = list(), set()
 
     if not os.path.exists("data"):
@@ -239,9 +209,12 @@ if __name__ == "__main__":
         t.daemon = True
         t.start()
 
-    for area in search_areas:
-        for lat, lng in get_circle_centers(area[0], area[1], params["radius"]):
-            q_radar.put((lat, lng))
+    # cover search area with circles
+    bounds = params["bounds"]
+    for lat, lng in get_circle_centers([bounds["lower"]["lat"], bounds["lower"]["lng"]],
+                                       [bounds["upper"]["lat"], bounds["upper"]["lng"]],
+                                       params["radius"]):
+        q_radar.put((lat, lng))
 
     q_radar.join()
 
