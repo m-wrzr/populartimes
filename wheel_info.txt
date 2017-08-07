@@ -1,0 +1,21 @@
+
+# cd into populartimes
+# build wheel
+python3 setup.py bdist_wheel
+
+# create virtualenv
+virtualenv --no-site-packages envname
+source envname/bin/activate
+
+# install package
+pip3 install dist/populartimes-2.0-py3-none-any.whl
+
+# check installation
+pip3 show populartimes
+
+# run
+python3
+import populartimes
+populartimes.main()
+
+# this should print out the results based on your stuff
