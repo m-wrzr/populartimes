@@ -278,24 +278,9 @@ def run():
 
 """
 
-ENTRY POINTS FROM HERE
+ENTRY POINT
 
 """
-
-
-def main():
-    """Entry point for the application script"""
-    global results
-    global g_place_ids
-
-    results, g_place_ids = list(), set()
-
-    global params
-    params = json.loads(open("params.json", "r").read())
-
-    run()
-
-    return results
 
 
 def execute(api_key, types, bound_lower, bound_upper, n_threads=20, radius=180):
@@ -334,7 +319,3 @@ def execute(api_key, types, bound_lower, bound_upper, n_threads=20, radius=180):
     run()
 
     return results
-
-
-if __name__ == "__main__":
-    print(main())

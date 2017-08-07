@@ -3,11 +3,22 @@ The goal of this update is to remove dependencies and make everything faster.
 
 ## Setup
 + Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 reqests/sec add payment information)
-+ Update params.json and add you API key, change search parameters and remove comments
-+ Run "python3 main.py"
++ Update params.json and add you API key, change search parameters and remove comments (optional)
++ Install the wheel via: pip3 install populartimes-2.0-py3.whl
++ Import: import populartimes
++ Run via: populartimes.execute(...)
+
+## Calling populartimes.execute(...)
++ **populartimes.execute**(api_key, types, bound_lower, bound_upper, n_threads (opt), radius (opt))
++ **api_key** str; api key from google places web service; e.g. "your-api-key"
++ **types** [str]; placetypes; see https://developers.google.com/places/supported_types; e.g. ["bar"]
++ **bound_lower** (float, float); lat/lng of southwest point; e.g. (48.132986, 11.566126)
++ **bound_upper** (float, float); lat/lng of northeast point; e.g. (48.142199, 11.580047)
++ **n_threads** int; number of threads used; e.g. 20
++ **radius** int; meters; from 1-180; e.g. 180
 
 ## Return
-+ Data for each place is written to a file in the data folder, with the google place id as filename
++ The data is represented as a list with json responses according to the example below
 + Example for a place.json
 ```json
 {
