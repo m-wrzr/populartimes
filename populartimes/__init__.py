@@ -285,11 +285,22 @@ def main():
 
     results, g_place_ids = list(), set()
 
-    # TODO parse command line args
     global params
     params = json.loads(open("params.json", "r").read())
 
     run()
-    # TODO all retrieved data is in result,
+
+    print(results)
+
+
+def main_param(_params):
+    global results
+    global g_place_ids
+
+    results, g_place_ids = list(), set()
+
+    global params
+    params = _params
+    run()
 
     print(results)

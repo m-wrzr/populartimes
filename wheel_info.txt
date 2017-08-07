@@ -18,4 +18,7 @@ python3
 import populartimes
 populartimes.main()
 
+# also possible, with params as args
+populartimes.main_param({yourparams})
+
 # this should print out the results based on your stuff
