@@ -154,36 +154,7 @@ def get_detail(place_id):
 
     detail_json["populartimes"] = populartimes_json
 
-    with open("data/" + detail_json["id"] + ".json", "w", encoding='utf-8') as file:
-        json.dump(detail_json, file, ensure_ascii=False)
-
     results.append(detail_json)
-
-
-def check_response_code(resp):
-    """
-    check if query quota has been surpassed or other errors occured
-    :param resp: json response
-    :return:
-    """
-    if resp["status"] == "OK" or resp["status"] == "ZERO_RESULTS":
-        return
-
-    if resp["status"] == "REQUEST_DENIED":
-        logging.error("Your request was denied, the API key is invalid.")
-
-    if resp["status"] == "OVER_QUERY_LIMIT":
-        logging.error("You exceeded your Query Limit for Google Places API Web Service, "
-                      "check https://developers.google.com/places/web-service/usage to upgrade your quota.")
-
-    if resp["status"] == "INVALID_REQUEST":
-        logging.error("The query string is malformed, "
-                      "check params.json if your formatting for lat/lng and radius is correct.")
-
-    # TODO return intermediary result
-
-    logging.error("Exiting application ...")
-    os._exit(1)
 
 
 def get_populartimes(place_identifier):
@@ -235,15 +206,38 @@ def get_populartimes(place_identifier):
     return popular_times, rating, rating_n
 
 
+def check_response_code(resp):
+    """
+    check if query quota has been surpassed or other errors occured
+    :param resp: json response
+    :return:
+    """
+    if resp["status"] == "OK" or resp["status"] == "ZERO_RESULTS":
+        return
+
+    if resp["status"] == "REQUEST_DENIED":
+        logging.error("Your request was denied, the API key is invalid.")
+
+    if resp["status"] == "OVER_QUERY_LIMIT":
+        logging.error("You exceeded your Query Limit for Google Places API Web Service, "
+                      "check https://developers.google.com/places/web-service/usage to upgrade your quota.")
+
+    if resp["status"] == "INVALID_REQUEST":
+        logging.error("The query string is malformed, "
+                      "check params.json if your formatting for lat/lng and radius is correct.")
+
+    # TODO return intermediary result
+
+    logging.error("Exiting application ...")
+    os._exit(1)
+
+
 def run():
     """
     wrap execution logic in method, for later external call
     :return:
     """
     start = datetime.datetime.now()
-
-    if not os.path.exists("data"):
-        os.makedirs("data")
 
     logging.info("Adding places to queue...")
 
@@ -292,3 +286,5 @@ if __name__ == "__main__":
 
     run()
     # TODO all retrieved data is in result,
+
+    print(results)
