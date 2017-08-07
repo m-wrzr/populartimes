@@ -4,12 +4,17 @@
 import json
 import logging
 import math
+import datetime
 import requests
 import os
 import ssl
-import sys
 import urllib.request
 import urllib.parse
+import threading
+from queue import Queue
+
+# logging.getLogger().setLevel(logging.INFO)
+
 
 radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
 detail_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
@@ -19,7 +24,6 @@ user_agent = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) App
 
 day_names = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
-# TODO add params to call
 params = json.loads(open("params.json", "r").read())
 
 
@@ -121,109 +125,119 @@ def get_circle_centers(lower, upper, radius):
     return coords
 
 
-def get_data(lower, upper):
+def worker():
+    """
+    worker that gets item of queue and starts detailed data retrieval
+    :return:
+    """
+    while True:
+        item = q.get()
+        get_data(item)
+        q.task_done()
+
+
+def get_data(place_id):
     """
     loads data for a given area
     :return:
     """
 
-    results = list()
-    circle_centers = get_circle_centers(lower, upper, params["radius"])
+    # places api - detail search - https://developers.google.com/places/web-service/details?hl=de
+    detail_str = detail_url.format(place_id, params["API_key"])
+    detail = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)["result"]
 
-    # TODO spawn multiple processes
+    searchterm = "{} {}".format(detail["name"], detail["formatted_address"])
 
-    # iterate over the circle centers that cover the search area
-    for it, (lat, lng) in enumerate(circle_centers):
+    popularity, rating, rating_n = None, None, None
 
-        logging.info("radarsearch center: {},{}".format(lat, lng))
+    try:
+        popularity, rating, rating_n = get_populartimes(searchterm)
+    except Exception as e:
+        logging.warning("Popular Times could not be loaded! Error: {}".format(e))
 
-        # places api - radar search - https://developers.google.com/places/web-service/search?hl=de#RadarSearchRequests
-        radar_str = radar_url.format(lat, lng, params["radius"], "|".join(params["type"]), params["API_key"])
-        radar = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)["results"]
+    if rating is None and "rating" in detail:
+        rating = detail["rating"]
+    if rating_n is None:
+        rating_n = 0
 
-        if len(radar) > 200:
-            logging.warning("more than 200 places in search radius, some data may get lost")
+    detail_json = {
+        "id": detail["place_id"],
+        "name": detail["name"],
+        "address": detail["formatted_address"],
+        "rating": rating,
+        "rating_n": rating_n,
+        "searchterm": searchterm,
+        "types": detail["types"],
+        "coordinates": detail["geometry"]["location"]
+    }
 
-        for place in radar:
+    populartimes_json, days_json = {}, [[0 for _ in range(24)] for _ in range(7)]
 
-            g_place_id = place["place_id"]
+    # get popularity for each day
+    if popularity is not None:
+        for day in popularity:
 
-            if g_place_id not in g_place_ids:
+            day_no, pop_times = day[:2]
 
-                g_place_ids.add(g_place_id)
+            if pop_times is not None:
+                for el in pop_times:
 
-                # display progress bar
-                # TODO show also job nr etc as information
-                sys.stdout.write(
-                    "radarsearch {} of {}, found {} places\r".format(it, len(circle_centers), len(g_place_ids)))
-                sys.stdout.flush()
+                    hour, pop = el[:2]
+                    days_json[day_no - 1][hour] = pop
 
-                # places api - detail search - https://developers.google.com/places/web-service/details?hl=de
-                detail_str = detail_url.format(g_place_id, params["API_key"])
-                detail = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)["result"]
+                    # day wrap
+                    if hour == 23:
+                        day_no = day_no % 7 + 1
 
-                searchterm = "{} {}".format(detail["name"], detail["formatted_address"])
+        populartimes_json = {
+            day_names[i]: days_json[i] for i in range(7)
+        }
 
-                popularity, rating, rating_n = None, None, None
+    detail_json["populartimes"] = populartimes_json
 
-                try:
-                    popularity, rating, rating_n = get_populartimes(searchterm)
-                except Exception as e:
-                    logging.warning("Popular Times could not be loaded! Error: {}".format(e))
+    with open("data/" + detail_json["id"] + ".json", "w", encoding='utf-8') as file:
+        json.dump(detail_json, file, ensure_ascii=False)
 
-                if rating is None and "rating" in detail:
-                    rating = detail["rating"]
-                if rating_n is None:
-                    rating_n = 0
-
-                detail_json = {
-                    "id": detail["place_id"],
-                    "name": detail["name"],
-                    "address": detail["formatted_address"],
-                    "rating": rating,
-                    "rating_n": rating_n,
-                    "searchterm": searchterm,
-                    "types": detail["types"],
-                    "coordinates": detail["geometry"]["location"]
-                }
-
-                populartimes_json, days_json = {}, [[0 for _ in range(24)] for _ in range(7)]
-
-                # get popularity for each day
-                if popularity is not None:
-                    for day in popularity:
-
-                        day_no, pop_times = day[:2]
-
-                        if pop_times is not None:
-                            for el in pop_times:
-
-                                hour, pop = el[:2]
-                                days_json[day_no - 1][hour] = pop
-
-                                # day wrap
-                                if hour == 23:
-                                    day_no = day_no % 7 + 1
-
-                    populartimes_json = {
-                        day_names[i]: days_json[i] for i in range(7)
-                    }
-
-                detail_json["populartimes"] = populartimes_json
-
-                with open("data/" + detail_json["id"] + ".json", "w", encoding='utf-8') as file:
-                    json.dump(detail_json, file, ensure_ascii=False)
-
-                results.append(detail_json)
+    results.append(detail_json)
 
 
 if __name__ == "__main__":
+    start = datetime.datetime.now()
     search_areas = decrease_area()
-    g_place_ids = set()
+    results, g_place_ids = list(), set()
 
     if not os.path.exists("data"):
         os.makedirs("data")
 
+    logging.info("Adding places to queue...")
     for area in search_areas:
-        # (lower, upper) bound
-        get_data(area[0], area[1])
+        for lat, lng in get_circle_centers(area[0], area[1], params["radius"]):
+
+            # places - radar search - https://developers.google.com/places/web-service/search?hl=de#RadarSearchRequests
+            radar_str = radar_url.format(lat, lng, params["radius"], "|".join(params["type"]), params["API_key"])
+            radar = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)["results"]
+
+            if len(radar) > 200:
+                logging.warning("more than 200 places in search radius, some data may get lost")
+
+            # retrieve google ids for detail search
+            for place in radar:
+                if place["place_id"] not in g_place_ids:
+                    g_place_ids.add(place["place_id"])
+
+    logging.info("{} places to process...".format(len(g_place_ids)))
+
+    # setup threading
+    q = Queue()
+
+    for i in range(params["n_threads"]):
+        t = threading.Thread(target=worker)
+        t.daemon = True
+        t.start()
+
+    for g_place_id in g_place_ids:
+        q.put(g_place_id)
+
+    q.join()
+
+    logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))

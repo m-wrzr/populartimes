@@ -4,6 +4,7 @@
   "type": [
     "bar" # https://developers.google.com/places/supported_types
   ],
+  "n_threads": 20, # number of threads for detail retrieval
   "bounds": {
     "lower": { # southwest
       "lat": 48.132986,
