@@ -118,10 +118,38 @@ def worker_radar():
         q_radar.task_done()
 
 
+def check_response_code(resp):
+    """
+    check if query quota has been surpassed or other errors occured
+    :param resp: json response
+    :return:
+    """
+    if resp["status"] == "OK" or resp["status"] == "ZERO_RESULTS":
+        return
+
+    if resp["status"] == "REQUEST_DENIED":
+        logging.error("Your request was denied, the API key is invalid.")
+
+    if resp["status"] == "OVER_QUERY_LIMIT":
+        logging.error("You exceeded your Query Limit for Google Places API Web Service, "
+                      "check https://developers.google.com/places/web-service/usage to upgrade your quota.")
+
+    if resp["status"] == "INVALID_REQUEST":
+        logging.error("The query string is malformed, "
+                      "check params.json if your formatting for lat/lng and radius is correct.")
+
+    # TODO return result
+
+    logging.error("Exiting application ...")
+    os._exit(1)
+
+
 def get_radar(_lat, _lng):
     # places - radar search - https://developers.google.com/places/web-service/search?hl=de#RadarSearchRequests
     radar_str = radar_url.format(_lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"])
-    radar = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)["results"]
+    resp = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)
+    check_response_code(resp)
+    radar = resp["results"]
 
     if len(radar) > 200:
         logging.warning("more than 200 places in search radius, some data may get lost")
@@ -141,7 +169,9 @@ def get_detail(place_id):
 
     # places api - detail search - https://developers.google.com/places/web-service/details?hl=de
     detail_str = detail_url.format(place_id, params["API_key"])
-    detail = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)["result"]
+    resp = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)
+    check_response_code(resp)
+    detail = resp["result"]
 
     searchterm = "{} {}".format(detail["name"], detail["formatted_address"])
 
