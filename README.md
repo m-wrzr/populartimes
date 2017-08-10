@@ -1,24 +1,28 @@
-# Populartimes - Version 2
-The goal of this update is to remove dependencies and make everything faster.
+# Populartimes
+The goal of this repository is to provide an option to retrieve Google Maps popular times data, until it is available via Google's API.
 
 ## Setup
 + Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 reqests/sec add payment information)
-+ Update params.json and add you API key, change search parameters and remove comments (optional)
 + Install the wheel via: pip3 install populartimes-2.0-py3.whl
 + Import: import populartimes
-+ Run via: populartimes.execute(...)
++ Run via: populartimes.get(...)
 
-## Calling populartimes.execute(...)
-+ **populartimes.execute**(api_key, types, bound_lower, bound_upper, n_threads (opt), radius (opt))
-+ **api_key** str; api key from google places web service; e.g. "your-api-key"
-+ **types** [str]; placetypes; see https://developers.google.com/places/supported_types; e.g. ["bar"]
-+ **bound_lower** (float, float); lat/lng of southwest point; e.g. (48.132986, 11.566126)
-+ **bound_upper** (float, float); lat/lng of northeast point; e.g. (48.142199, 11.580047)
-+ **n_threads** int; number of threads used; e.g. 20
-+ **radius** int; meters; from 1-180; e.g. 180
+## Calling populartimes.get(...)
++ **populartimes.get**(api_key, types, bound_lower, bound_upper, n_threads (opt), radius (opt), all_places (opt))
+    + **api_key** str; api key from google places web service; e.g. "your-api-key"
+    + **types** [str]; placetypes; see https://developers.google.com/places/supported_types; e.g. ["bar"]
+    + **bound_lower** (float, float); lat/lng of southwest point; e.g. (48.132986, 11.566126)
+    + **bound_upper** (float, float); lat/lng of northeast point; e.g. (48.142199, 11.580047)
+    + **n_threads (opt)** int; number of threads used; e.g. 20
+    + **radius (opt)** int; meters; from 1-180 for radar search; e.g. 180
+    + **all_places (opt)** bool; include/exclude places without populartimes
+
++ example call:
+    + populartimes.get("your-api-key", ["bar"], (48.132986, 11.566126), (48.142199, 11.580047))
 
 ## Return
 + The data is represented as a list with json responses according to the example below
++ The populartimes data for each day is an array of length 24, with populartimes data starting from hour 0 to 23
 + Example for a place.json
 ```json
 {
@@ -83,3 +87,6 @@ The goal of this update is to remove dependencies and make everything faster.
     ]
  }
  ```
+
+ ## Example how the data can be used for visualization
+ ![Bars-Gif](/content/bars_visualization.gif "Bars Munich,Berlin,Barcelona, London")
