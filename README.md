@@ -1,11 +1,11 @@
 # Populartimes
-The goal of this repository is to provide an option to retrieve Google Maps popular times data, until it is available via Google's API.
+The goal of this repository is to provide an option to use Google Maps popular times data, until it is available via Google's API.
 
-## Setup
+## How to get started
 + Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 reqests/sec add payment information)
 + Install the wheel via: pip3 install populartimes-2.0-py3.whl
-+ Import: import populartimes
-+ Run via: populartimes.get(...)
++ *import populartimes* and run with *populartimes.get(...)*
+
 
 ## Calling populartimes.get(...)
 + **populartimes.get**(api_key, types, bound_lower, bound_upper, n_threads (opt), radius (opt), all_places (opt))
@@ -20,7 +20,7 @@ The goal of this repository is to provide an option to retrieve Google Maps popu
 + example call:
     + populartimes.get("your-api-key", ["bar"], (48.132986, 11.566126), (48.142199, 11.580047))
 
-## Return
+## Response
 + The data is represented as a list with json responses according to the example below
 + The populartimes data for each day is an array of length 24, with populartimes data starting from hour 0 to 23
 + Example for a place.json
