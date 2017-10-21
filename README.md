@@ -1,14 +1,13 @@
 # Populartimes
-The goal of this repository is to provide an option to use Google Maps popular times data, until it is available via Google's API.
+The goal of this script is to provide an option to use Google Maps popular times data, until it is available via Google's API.
 
 ## How to get started
-+ Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 reqests/sec add payment information)
-+ Install the wheel via: pip3 install populartimes-2.0-py3.whl
-+ *import populartimes* and run with *populartimes.get(...)*
++ Get a Google Maps API key https://developers.google.com/places/web-service/ (for more than 1000 reqests/sec add payment information).
++ Install the wheel via: `pip3 install populartimes-2.0-py3.whl` or `python setup.py install`
++ `import populartimes` and run with `populartimes.get(...)`
 
-
-## Calling populartimes.get(...)
-+ **populartimes.get**(api_key, types, bound_lower, bound_upper, n_threads (opt), radius (opt), all_places (opt))
+## Calling populartimes.get
++ `populartimes.get(api_key, types, bound_lower, bound_upper, n_threads=20, radius=180, all_places=False):`
     + **api_key** str; api key from google places web service; e.g. "your-api-key"
     + **types** [str]; placetypes; see https://developers.google.com/places/supported_types; e.g. ["bar"]
     + **bound_lower** (float, float); lat/lng of southwest point; e.g. (48.132986, 11.566126)
@@ -17,13 +16,16 @@ The goal of this repository is to provide an option to use Google Maps popular t
     + **radius (opt)** int; meters; from 1-180 for radar search; e.g. 180
     + **all_places (opt)** bool; include/exclude places without populartimes
 
-+ example call:
-    + populartimes.get("your-api-key", ["bar"], (48.132986, 11.566126), (48.142199, 11.580047))
++ example call
+    
+	`populartimes.get("your-api-key", ["bar"], (48.132986, 11.566126), (48.142199, 11.580047))`
+
+See also the examples in `tests/test.py`.
 
 ## Response
-+ The data is represented as a list with json responses according to the example below
-+ The populartimes data for each day is an array of length 24, with populartimes data starting from hour 0 to 23
-+ Example for a place.json
++ The data is represented as a list with json responses according to the example below.
++ The populartimes data for each day is an array of length 24, with populartimes data starting from hour 0 to 23.
++ Example output:
 ```json
 {
   "id": "ChIJ6cI52_EBCUER56PDz9hLEx0",
