@@ -1,17 +1,16 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import calendar
 import datetime
-import json
 import logging
-import math
+import json
 import os
 import requests
-import ssl
 import threading
-import urllib.request
-import urllib.parse
+import geopy
+import geopy.distance
+
+from .populartimes import get_populartimes
 
 from queue import Queue
 
@@ -22,10 +21,6 @@ from queue import Queue
 radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
 detail_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
 
-# user agent for populartimes request
-user_agent = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
-                            "AppleWebKit/537.36 (KHTML, like Gecko) "
-                            "Chrome/54.0.2840.98 Safari/537.36"}
 
 # shared vars for threading
 q_radar = Queue()
@@ -43,15 +38,18 @@ def get_circle_centers(lower, upper, radius):
     :param radius: specified radius, adapt for high density areas
     :return: list of circle centers that cover the area between lower/upper
     """
-    r, coords = 6378, list()
-    while lower[1] < upper[1]:
-        tmp = lower[0]
-
-        while tmp < upper[0]:
-            coords.append([tmp, lower[1]])
-            tmp += (0.25 / r) * (radius / math.pi)
-        lower[1] += (0.25 / r) * (radius / math.pi) / math.cos(lower[00] * math.pi / radius)
-
+    coords = []
+    bounds = [lower, upper]
+    low = geopy.Point([min([b[i] for b in bounds]) for i in [0, 1]])
+    high = geopy.Point([max([b[i] for b in bounds]) for i in [0, 1]])
+    P = low
+    while P.latitude < high.latitude:
+        P = geopy.distance.VincentyDistance(meters=radius / 2).destination(point=P, bearing=0)  # Go North
+        P.longitude = low.longitude
+        while P.longitude < high.longitude:
+            P = geopy.distance.VincentyDistance(meters=radius / 2).destination(point=P, bearing=90)  # Go East
+            coords.append(P)
+    coords = [c[:2] for c in coords]
     return coords
 
 
@@ -99,7 +97,6 @@ def get_detail(place_id):
     loads data for a given area
     :return:
     """
-
     # places api - detail search - https://developers.google.com/places/web-service/details?hl=de
     detail_str = detail_url.format(place_id, params["API_key"])
     resp = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)
@@ -108,8 +105,9 @@ def get_detail(place_id):
 
     searchterm = "{} {}".format(detail["name"], detail["formatted_address"])
 
-    popularity, rating, rating_n = get_populartimes(searchterm)
+    popularity, rating, rating_n = get_populartimes(searchterm, detail["place_id"])
 
+    # Rating
     if rating is None and "rating" in detail:
         rating = detail["rating"]
     if rating_n is None:
@@ -123,88 +121,13 @@ def get_detail(place_id):
         "rating_n": rating_n,
         "searchterm": searchterm,
         "types": detail["types"],
-        "coordinates": detail["geometry"]["location"]
+        "coordinates": detail["geometry"]["location"],
+        "populartimes": popularity
     }
 
-    populartimes_json, days_json = [], [[0 for _ in range(24)] for _ in range(7)]
-
-    # get popularity for each day
-    if popularity is not None:
-        for day in popularity:
-
-            day_no, pop_times = day[:2]
-
-            if pop_times is not None:
-                for el in pop_times:
-
-                    hour, pop = el[:2]
-                    days_json[day_no - 1][hour] = pop
-
-                    # day wrap
-                    if hour == 23:
-                        day_no = day_no % 7 + 1
-
-        # {"name" : "monday", "data": [...]} for each weekday as list
-        populartimes_json = [
-            {
-                "name": list(calendar.day_name)[d],
-                "data": days_json[d]
-            } for d in range(7)
-        ]
-
-    detail_json["populartimes"] = populartimes_json
-
+    # Add to results
     if params["all_places"] or len(detail_json["populartimes"]) > 0:
         results.append(detail_json)
-
-
-def get_populartimes(place_identifier):
-    """
-    sends request to google/search and parses json response to get data
-    :param place_identifier: string with place name and address
-    :return: tuple with popular times, rating and number of ratings/comments
-    """
-    params_url = {
-        "tbm": "map",
-        "hl": "de",
-        "tch": 1,
-        "q": urllib.parse.quote_plus(place_identifier)
-    }
-
-    search_url = "https://www.google.de/search?" + "&".join(k + "=" + str(v) for k, v in params_url.items())
-    logging.info("searchterm: " + search_url)
-
-    gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
-    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=user_agent),
-                                  context=gcontext)
-    data = resp.read().decode('utf-8')
-
-    # find eof json
-    jend = data.rfind("}")
-    if jend >= 0:
-        data = data[:jend + 1]
-
-    jdata = json.loads(data)["d"]
-    jdata = json.loads(jdata[4:])
-
-    popular_times, rating, rating_n = None, None, None
-
-    try:
-        # get info from result array, has to be adapted if backend api changes
-        info = jdata[0][1][0][14]
-
-        rating = info[4][7]
-        rating_n = info[4][8]
-        popular_times = info[84][0]
-
-    # ignore, there is either no info available or no popular times
-    # TypeError: rating/rating_n/populartimes in None
-    # IndexError: info is not available
-    except (TypeError, IndexError):
-        pass
-
-    return popular_times, rating, rating_n
 
 
 def check_response_code(resp):
@@ -253,9 +176,8 @@ def run(_params):
 
     # cover search area with circles
     bounds = params["bounds"]
-    for lat, lng in get_circle_centers([bounds["lower"]["lat"], bounds["lower"]["lng"]],  # southwest
-                                       [bounds["upper"]["lat"], bounds["upper"]["lng"]],  # northeast
-                                       params["radius"]):
+
+    for lat, lng in get_circle_centers(bounds["lower"], bounds["upper"], params["radius"]):
         q_radar.put((lat, lng))
 
     q_radar.join()

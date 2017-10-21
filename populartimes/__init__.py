@@ -4,9 +4,7 @@
 from .crawler import run
 
 """
-
 ENTRY POINT
-
 """
 
 
@@ -29,14 +27,8 @@ def get(api_key, types, bound_lower, bound_upper, n_threads=20, radius=180, all_
         "n_threads": n_threads,
         "all_places": all_places,
         "bounds": {
-            "lower": {
-                "lat": bound_lower[0],
-                "lng": bound_lower[1]
-            },
-            "upper": {
-                "lat": bound_upper[0],
-                "lng": bound_upper[1]
-            }
+            "lower": bound_lower,
+            "upper": bound_upper
         }
     }
 
