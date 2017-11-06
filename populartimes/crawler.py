@@ -123,7 +123,8 @@ def get_detail(place_id):
         "rating_n": rating_n,
         "searchterm": searchterm,
         "types": detail["types"],
-        "coordinates": detail["geometry"]["location"]
+        "coordinates": detail["geometry"]["location"],
+        "phone": detail["international_phone_number"]
     }
 
     populartimes_json, days_json = [], [[0 for _ in range(24)] for _ in range(7)]
@@ -264,9 +265,20 @@ def get_current_popular_times(api_key, place_id):
     # TypeError: rating/rating_n/populartimes in None
     # IndexError: info is not available
     except (TypeError, IndexError):
-        return -1
+        popular_times = [0, -1]
 
-    return popular_times[1]
+    detail_json = {
+        "id": detail["place_id"],
+        "name": detail["name"],
+        "address": detail["formatted_address"],
+        "rating": detail["rating"] if "rating" in detail else "-1",
+        "current_popularity": popular_times[1],
+        "types": detail["types"],
+        "coordinates": detail["geometry"]["location"],
+        "phone": detail["international_phone_number"] if "international_phone_number" in detail else ""
+    }
+
+    return detail_json
 
 
 def check_response_code(resp):
