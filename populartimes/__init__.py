@@ -20,7 +20,7 @@ def get(api_key, types, bound_lower, bound_upper, n_threads=20, radius=180, all_
     :param n_threads: int; number of threads to call
     :param radius: int; meters; from 1-180
     :param all_places: bool; include/exclude places without populartimes
-    :return:
+    :return: see readme
     """
 
     params = {
@@ -49,6 +49,6 @@ def get_current(api_key, place_id):
     retrieves the current popularity for a given place
     :param api_key:
     :param place_id:
-    :return: popularity, -1 if none available
+    :return: see readme
     """
     return get_current_popular_times(api_key, place_id)
