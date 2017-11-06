@@ -110,22 +110,33 @@ def get_detail(place_id):
 
     popularity, rating, rating_n = get_populartimes(searchterm)
 
-    if rating is None and "rating" in detail:
-        rating = detail["rating"]
-    if rating_n is None:
-        rating_n = 0
-
     detail_json = {
         "id": detail["place_id"],
         "name": detail["name"],
         "address": detail["formatted_address"],
-        "rating": rating,
-        "rating_n": rating_n,
         "searchterm": searchterm,
         "types": detail["types"],
         "coordinates": detail["geometry"]["location"],
-        "phone": detail["international_phone_number"]
     }
+
+    # check optional return parameters
+    if rating is not None:
+        detail_json["rating"] = rating
+    elif "rating" in detail:
+        detail_json["rating"] = detail["rating"]
+    if rating_n is None:
+        detail_json["rating_n"] = 0
+    else:
+        detail_json["rating_n"] = rating_n
+    if "international_phone_number" in detail:
+        detail_json["international_phone_number"] = detail["international_phone_number"]
+
+    # get current popularity
+    place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
+    current_popularity = get_current_popularity(place_identifier)
+
+    if current_popularity is not None:
+        detail_json["current_popularity"] = current_popularity
 
     populartimes_json, days_json = [], [[0 for _ in range(24)] for _ in range(7)]
 
@@ -208,21 +219,12 @@ def get_populartimes(place_identifier):
     return popular_times, rating, rating_n
 
 
-def get_current_popular_times(api_key, place_id):
+def get_current_popularity(place_identifier):
     """
-    sends request to detail to get a search string and uses standard proto buffer to get additional information
-    on the current status of popular times
-    :return: [hour, current_popularity[
+    request information for a place and parse current popularity
+    :param place_identifier: name and address string
+    :return:
     """
-
-    # places api - detail search - https://developers.google.com/places/web-service/details?hl=de
-    detail_str = detail_url.format(place_id, api_key)
-    resp = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)
-    check_response_code(resp)
-    detail = resp["result"]
-
-    place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
-
     params_url = {
         "tbm": "map",
         "tch": 1,
@@ -259,24 +261,46 @@ def get_current_popular_times(api_key, place_id):
     try:
         # get info from result array, has to be adapted if backend api changes
         info = jdata[0][1][0][14]
-        popular_times = info[84][7]
+        return info[84][7][1]
 
     # ignore, there is either no info available or no popular times
     # TypeError: rating/rating_n/populartimes in None
     # IndexError: info is not available
     except (TypeError, IndexError):
-        popular_times = [0, -1]
+        return None
+
+
+def get_current_popular_times(api_key, place_id):
+    """
+    sends request to detail to get a search string and uses standard proto buffer to get additional information
+    on the current status of popular times
+    :return: json details
+    """
+
+    # places api - detail search - https://developers.google.com/places/web-service/details?hl=de
+    detail_str = detail_url.format(place_id, api_key)
+    resp = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)
+    check_response_code(resp)
+    detail = resp["result"]
+
+    place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
+    current_popularity = get_current_popularity(place_identifier)
 
     detail_json = {
         "id": detail["place_id"],
         "name": detail["name"],
         "address": detail["formatted_address"],
-        "rating": detail["rating"] if "rating" in detail else "-1",
-        "current_popularity": popular_times[1],
         "types": detail["types"],
-        "coordinates": detail["geometry"]["location"],
-        "phone": detail["international_phone_number"] if "international_phone_number" in detail else ""
+        "coordinates": detail["geometry"]["location"]
     }
+
+    # check optional return parameters
+    if current_popularity is not None:
+        detail_json["current_popularity"] = current_popularity
+    if "rating" in detail:
+        detail_json["rating"] = detail["rating"]
+    if "international_phone_number" in detail:
+        detail_json["international_phone_number"] = detail["international_phone_number"]
 
     return detail_json
 

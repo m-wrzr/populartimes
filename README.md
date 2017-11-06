@@ -17,13 +17,14 @@ The goal of this repository is to provide an option to use Google Maps popular t
     + **radius (opt)** int; meters; from 1-180 for radar search; e.g. 180
     + **all_places (opt)** bool; include/exclude places without populartimes
 
-+ example call:
++ **Example call**
     + populartimes.get("your-api-key", ["bar"], (48.132986, 11.566126), (48.142199, 11.580047))
 
-## Response
-+ The data is represented as a list with json responses according to the example below
-+ The populartimes data for each day is an array of length 24, with populartimes data starting from hour 0 to 23
-+ Example for a place.json
++ **Response**
+    + The data is represented as a list of dictionaries, with responses according to the example below
+    + The populartimes data for each day is an array of length 24, with populartimes data starting from hour 0 to 23
+    + *current_popularity*, *rating*, *rating_n* and *phone* are optional return parameters and only present if available.
+
 ```json
 {
   "id": "ChIJ6cI52_EBCUER56PDz9hLEx0",
@@ -89,17 +90,20 @@ The goal of this repository is to provide an option to use Google Maps popular t
     ]
  }
  ```
- 
+
  
 ## populartimes.get_current(...)
 + **populartimes.get_current**(api_key, place_id)
     + **api_key** str; api key from google places web service; e.g. "your-api-key"
     + **place_id** str; unique google maps id; retrievable via populartimes.get() or https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder
  
- ## Response
-+ The data is represented as a list with json responses according to the example below
-+ The populartimes data for each day is an array of length 24, with populartimes data starting from hour 0 to 23
-+ Example for a place.json
++ **Example call**
+    + populartimes.get_current("your-api-key", "ChIJ01CaE2PfnUcRUpb8Ylg-UXo")
+ 
++ **Response**
+    + The data is represented as a dictionary containing information
+    + *current_popularity*, *rating* and *phone* are optional return parameters and only present if available. 
+
 ```json
 {
   "address": "Museumsinsel 1, 80538 München, Germany",
