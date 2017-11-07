@@ -8,10 +8,10 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta, weekdays
 
 
-def get_populartimes(search_term, place_id, explicitDatetimes=False):
-    if place_id is not None:
-        return PopularTimesMaps(explicitDatetimes).get(place_id)
-    return PopularTimesSearch(explicitDatetimes).get(search_term)
+def get_populartimes(search_term, place_id, explicitDatetimes=False, method="search"):
+    if place_id is None or method == "search":
+        return PopularTimesSearch(explicitDatetimes).get(search_term)
+    return PopularTimesMaps(explicitDatetimes).get(place_id)
 
 
 class PopularTimes(object):
@@ -27,6 +27,8 @@ class PopularTimes(object):
         if self.explicitDatetimes:
             out = {}
             for i, p in enumerate(popularity):
+                if p[1] is None:  # No data
+                    continue
                 time = datetime.now() + relativedelta(weekday=weekdays[i - 1](-1))  # datetime: mo<->0, google: mo<->1
                 for h in p[1]:
                     time = time.replace(hour=h[0], minute=0, second=0, microsecond=0)
@@ -101,7 +103,7 @@ class PopularTimesMaps(PopularTimes):
 
     def get(self, place_id, dryscrape=False):
         url = "https://www.google.com/maps/place/?q=place_id:{}&force=tt".format(place_id)
-        reg = r"\[" + r"(?:\[\d+,\[" + r"(?:\[\d+,\d+,(?:.*?)\]\\n,*)+" + r"\]\\n,\d+\]\\n,*)+\]\\n"
+        reg = r"\[" + r"(?:\[\d+," + r"(?:\[(?:\[\d+,\d+,(?:.*?)\],*)+\]|null)" + r",\d+\],*)+\]"
         if not dryscrape:
             t = requests.get(url, headers={'User-Agent': UserAgent().random, 'Cache-Control': 'no-cache'}).text
         else:
@@ -114,10 +116,15 @@ class PopularTimesMaps(PopularTimes):
             s.at_css(".section-popular-times", timeout=30)
             t = s.body()
         # Popularity
-        pop = re.findall(reg, t)[0]
-        pop = pop.replace("\\n", "")
-        pop = pop.replace(r'\"', '"')
-        pop = json.loads(pop)
+        t = t.replace("\\n", "")
+        t = t.replace(r'\"', '"')
+        # with open("test-{}.html".format(place_id), "w") as f:
+        #     f.write(t)
+        try:
+            pop = re.findall(reg, t)[0]
+            pop = json.loads(pop)
+        except:
+            return None
         popularity = self._processPopularity(pop)
 
         # Current popularity
