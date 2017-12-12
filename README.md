@@ -1,5 +1,5 @@
 # Populartimes
-The goal of this library is to provide an option to use Google Maps popular times data, until it is available via Google"s API.
+The goal of this library is to provide an option to use Google Maps popular times data, until it is available via Google's API.
 
 ## How to get started
 + Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 reqests/sec add payment information)
@@ -93,36 +93,19 @@ The goal of this library is to provide an option to use Google Maps popular time
  ```
 
  
-## populartimes.get_current(...)
-+ **populartimes.get_current**(api_key, place_id)
+## populartimes.get_id(...)
++ **populartimes.get_id**(api_key, place_id)
     + **api_key** str; api key from google places web service; e.g. "your-api-key"
     + **place_id** str; unique google maps id; retrievable via populartimes.get() or https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder
  
 + **Example call**
-    + populartimes.get_current("your-api-key", "ChIJ01CaE2PfnUcRUpb8Ylg-UXo")
+    + populartimes.get_id("your-api-key", "ChIJ01CaE2PfnUcRUpb8Ylg-UXo")
  
 + **Response**
+    + The response format is equal to the json described above, with the exception of the search term parameter, which is not present.
     + The data is represented as a dictionary containing information
-    + *current_popularity*, *rating* and *phone* are optional return parameters and only present if available. 
+    + *current_popularity*, *rating*, *rating_n* and *phone* are optional return parameters and only present if available.
 
-```json
-{
-  "address": "Museumsinsel 1, 80538 München, Germany",
-  "coordinates": {
-    "lat": 48.1298707,
-    "lng": 11.5834522
-  },
-  "current_popularity": 28,
-  "id": "ChIJ01CaE2PfnUcRUpb8Ylg-UXo",
-  "name": "Deutsches Museum",
-  "phone": "+49 89 21791",
-  "rating": 4.5,
-  "types": [
-    "museum",
-    "point_of_interest",
-    "establishment"
-  ]
-}
 ```
 
  ## Example how the data can be used for visualization

@@ -44,7 +44,7 @@ def get(api_key, types, bound_lower, bound_upper, n_threads=20, radius=180, all_
     return run(params)
 
 
-def get_current(api_key, place_id):
+def get_id(api_key, place_id):
     """
     retrieves the current popularity for a given place
     :param api_key:

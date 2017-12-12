@@ -49,6 +49,7 @@ def get_circle_centers(lower, upper, radius):
 
         while tmp < upper[0]:
             coords.append([tmp, lower[1]])
+
             tmp += (0.25 / r) * (radius / math.pi)
         lower[1] += (0.25 / r) * (radius / math.pi) / math.cos(lower[00] * math.pi / radius)
 
@@ -92,6 +93,32 @@ def worker_detail():
         item = q_detail.get()
         get_detail(item)
         q_detail.task_done()
+
+
+def get_popularity_for_day(popularity):
+    days_json = [[0 for _ in range(24)] for _ in range(7)]
+
+    for day in popularity:
+
+        day_no, pop_times = day[:2]
+
+        if pop_times is not None:
+            for el in pop_times:
+
+                hour, pop = el[:2]
+                days_json[day_no - 1][hour] = pop
+
+                # day wrap
+                if hour == 23:
+                    day_no = day_no % 7 + 1
+
+    # {"name" : "monday", "data": [...]} for each weekday as list
+    return [
+        {
+            "name": list(calendar.day_name)[d],
+            "data": days_json[d]
+        } for d in range(7)
+    ]
 
 
 def get_detail(place_id):
@@ -138,33 +165,7 @@ def get_detail(place_id):
     if current_popularity is not None:
         detail_json["current_popularity"] = current_popularity
 
-    populartimes_json, days_json = [], [[0 for _ in range(24)] for _ in range(7)]
-
-    # get popularity for each day
-    if popularity is not None:
-        for day in popularity:
-
-            day_no, pop_times = day[:2]
-
-            if pop_times is not None:
-                for el in pop_times:
-
-                    hour, pop = el[:2]
-                    days_json[day_no - 1][hour] = pop
-
-                    # day wrap
-                    if hour == 23:
-                        day_no = day_no % 7 + 1
-
-        # {"name" : "monday", "data": [...]} for each weekday as list
-        populartimes_json = [
-            {
-                "name": list(calendar.day_name)[d],
-                "data": days_json[d]
-            } for d in range(7)
-        ]
-
-    detail_json["populartimes"] = populartimes_json
+    detail_json["populartimes"] = get_popularity_for_day(popularity) if popularity is not None else []
 
     if params["all_places"] or len(detail_json["populartimes"]) > 0:
         results.append(detail_json)
@@ -258,16 +259,26 @@ def get_current_popularity(place_identifier):
     jdata = json.loads(data)["d"]
     jdata = json.loads(jdata[4:])
 
+    popular_times, rating, rating_n, current_popularity = None, None, None, None
+
     try:
         # get info from result array, has to be adapted if backend api changes
         info = jdata[0][1][0][14]
-        return info[84][7][1]
+
+        rating = info[4][7]
+        rating_n = info[4][8]
+        popular_times = info[84][0]
+
+        # current_popularity is not available if popular_times is
+        current_popularity = info[84][7][1]
 
     # ignore, there is either no info available or no popular times
     # TypeError: rating/rating_n/populartimes in None
     # IndexError: info is not available
     except (TypeError, IndexError):
-        return None
+        pass
+
+    return rating, rating_n, popular_times, current_popularity
 
 
 def get_current_popular_times(api_key, place_id):
@@ -284,7 +295,7 @@ def get_current_popular_times(api_key, place_id):
     detail = resp["result"]
 
     place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
-    current_popularity = get_current_popularity(place_identifier)
+    rating, rating_n, popularity, current_popularity = get_current_popularity(place_identifier)
 
     detail_json = {
         "id": detail["place_id"],
@@ -295,12 +306,22 @@ def get_current_popular_times(api_key, place_id):
     }
 
     # check optional return parameters
-    if current_popularity is not None:
-        detail_json["current_popularity"] = current_popularity
-    if "rating" in detail:
+    if rating is not None:
+        detail_json["rating"] = rating
+    elif "rating" in detail:
         detail_json["rating"] = detail["rating"]
+
+    if rating_n is None:
+        detail_json["rating_n"] = 0
+    else:
+        detail_json["rating_n"] = rating_n
+
     if "international_phone_number" in detail:
         detail_json["international_phone_number"] = detail["international_phone_number"]
+    if current_popularity is not None:
+        detail_json["current_popularity"] = current_popularity
+
+    detail_json["populartimes"] = get_popularity_for_day(popularity) if popularity is not None else []
 
     return detail_json
 
