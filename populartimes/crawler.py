@@ -160,7 +160,7 @@ def get_detail(place_id):
 
     # get current popularity
     place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
-    current_popularity = get_current_popularity(place_identifier)
+    _, _, _, current_popularity = get_current_popularity(place_identifier)
 
     if current_popularity is not None:
         detail_json["current_popularity"] = current_popularity

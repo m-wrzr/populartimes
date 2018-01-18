@@ -5,7 +5,7 @@ The goal of this library is to provide an option to use Google Maps popular time
 + Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 reqests/sec add payment information)
 + Install the wheel via: pip3 install populartimes-2.0-py3.whl
 + **Note**: The library is not available via PyPI, so you have to clone/download the repository and install the file locally.
-+ *import populartimes* and run with *populartimes.get(...)* or *populartimes.get_current(...)*
++ *import populartimes* and run with *populartimes.get(...)* or *populartimes.get_id(...)*
 
 
 ## populartimes.get(...)
