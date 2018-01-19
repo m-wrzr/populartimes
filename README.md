@@ -2,7 +2,7 @@
 The goal of this library is to provide an option to use Google Maps popular times data, until it is available via Google's API.
 
 ## How to get started
-+ Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 reqests/sec add payment information)
++ Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 requests/sec add payment information)
 + Install the wheel via: pip3 install populartimes-2.0-py3.whl
 + **Note**: The library is not available via PyPI, so you have to clone/download the repository and install the file locally.
 + *import populartimes* and run with *populartimes.get(...)* or *populartimes.get_id(...)*
@@ -12,10 +12,10 @@ The goal of this library is to provide an option to use Google Maps popular time
 + **populartimes.get**(api_key, types, bound_lower, bound_upper, n_threads (opt), radius (opt), all_places (opt))
     + **api_key** str; api key from google places web service; e.g. "your-api-key"
     + **types** [str]; placetypes; see https://developers.google.com/places/supported_types; e.g. ["bar"]
-    + **bound_lower** (float, float); lat/lng of southwest point; e.g. (48.132986, 11.566126)
-    + **bound_upper** (float, float); lat/lng of northeast point; e.g. (48.142199, 11.580047)
+    + **p1** (float, float); lat/lng of point delimiting the search area; e.g. (48.132986, 11.566126)
+    + **p2** (float, float); lat/lng of point delimiting the search area; e.g. (48.142199, 11.580047)
     + **n_threads (opt)** int; number of threads used; e.g. 20
-    + **radius (opt)** int; meters; from 1-180 for radar search; e.g. 180
+    + **radius (opt)** int; meters; up to 50,000 for radar search; e.g. 180; this has can be adapted for very dense areas
     + **all_places (opt)** bool; include/exclude places without populartimes
 
 + **Example call**

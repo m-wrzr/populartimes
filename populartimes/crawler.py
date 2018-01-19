@@ -3,6 +3,8 @@
 
 import calendar
 import datetime
+import geopy
+import geopy.distance
 import json
 import logging
 import math
@@ -13,6 +15,8 @@ import threading
 import urllib.request
 import urllib.parse
 
+from geopy.distance import vincenty
+from geopy.distance import VincentyDistance
 from queue import Queue
 
 # change for logging visibility
@@ -27,33 +31,57 @@ user_agent = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
                             "Chrome/54.0.2840.98 Safari/537.36"}
 
-# shared vars for threading
-q_radar = Queue()
-q_detail = Queue()
-g_place_ids = set()
-results = list()
 
-
-def get_circle_centers(lower, upper, radius):
+def get_circle_centers(b1, b2, radius):
     """
-    cover the search area with circles for radar search
-    http://stackoverflow.com/questions/7477003/calculating-new-longtitude-latitude-from-old-n-meters
-    :param lower: lower bound of area (westmost + southmost)
-    :param upper: upper bound of area (eastmost + northmost)
+    the function covers the area within the bounds with circles
+    this is done by calculating the lat/lng distances and the number of circles needed to fill the area
+    as these circles only intersect at one point, an additional grid with a (+radius,+radius) offset is used to
+    cover the empty spaces
+
+    :param b1: bounds
+    :param b2: bounds
     :param radius: specified radius, adapt for high density areas
     :return: list of circle centers that cover the area between lower/upper
     """
-    r, coords = 6378, list()
-    while lower[1] < upper[1]:
-        tmp = lower[0]
 
-        while tmp < upper[0]:
-            coords.append([tmp, lower[1]])
+    sw = geopy.Point(b1)
+    ne = geopy.Point(b2)
 
-            tmp += (0.25 / r) * (radius / math.pi)
-        lower[1] += (0.25 / r) * (radius / math.pi) / math.cos(lower[00] * math.pi / radius)
+    # north/east distances
+    dist_lat = int(vincenty(geopy.Point(sw[0], sw[1]), geopy.Point(ne[0], sw[1])).meters)
+    dist_lng = int(vincenty(geopy.Point(sw[0], sw[1]), geopy.Point(sw[0], ne[1])).meters)
 
-    return coords
+    def cover(p_start, n_lat, n_lng, r):
+        _coords = []
+
+        for i in range(n_lat):
+            for j in range(n_lng):
+                v_north = VincentyDistance(meters=i * r * 2)
+                v_east = VincentyDistance(meters=j * r * 2)
+
+                _coords.append(v_north.destination(v_east.destination(point=p_start, bearing=90), bearing=0))
+
+        return _coords
+
+    coords = []
+
+    # get circles for base cover
+    coords += cover(sw,
+                    math.ceil((dist_lat - radius) / (2 * radius)) + 1,
+                    math.ceil((dist_lng - radius) / (2 * radius)) + 1, radius)
+
+    # update south-west for second cover
+    vc_radius = VincentyDistance(meters=radius)
+    sw = vc_radius.destination(vc_radius.destination(point=sw, bearing=0), bearing=90)
+
+    # get circles for offset cover
+    coords += cover(sw,
+                    math.ceil((dist_lat - 2 * radius) / (2 * radius)) + 1,
+                    math.ceil((dist_lng - 2 * radius) / (2 * radius)) + 1, radius)
+
+    # only return the coordinates
+    return [c[:2] for c in coords]
 
 
 def worker_radar():
@@ -77,11 +105,19 @@ def get_radar(_lat, _lng):
     if len(radar) > 200:
         logging.warning("more than 200 places in search radius, some data may get lost")
 
+    bounds = params["bounds"]
+
     # retrieve google ids for detail search
     for place in radar:
-        # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
-        if place["place_id"] not in g_place_ids:
-            g_place_ids.add(place["place_id"])
+
+        geo = place["geometry"]["location"]
+
+        if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
+                and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
+
+            # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
+            if place["place_id"] not in g_place_ids:
+                g_place_ids.add(place["place_id"])
 
 
 def worker_detail():
@@ -359,8 +395,12 @@ def run(_params):
     """
     start = datetime.datetime.now()
 
-    global params
+    global params, g_place_ids, q_radar, q_detail, results
+
+    # shared variables
     params = _params
+    q_radar, q_detail = Queue(), Queue()
+    g_place_ids, results = set(), list()
 
     logging.info("Adding places to queue...")
 
