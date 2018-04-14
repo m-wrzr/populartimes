@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from .crawler import run
-from .crawler import get_current_popular_times
+from .crawler import get_populartimes
 
 """
 
@@ -17,8 +17,8 @@ def get(api_key, types, p1, p2, n_threads=20, radius=180, all_places=False):
     :param types: [str]; placetypes
     :param p1: (float, float); lat/lng of a delimiting point
     :param p2: (float, float); lat/lng of a delimiting point
-    :param n_threads: int; number of threads to call
-    :param radius: int; meters; from 1-180
+    :param n_threads: int; number of threads to use
+    :param radius: int; meters;
     :param all_places: bool; include/exclude places without populartimes
     :return: see readme
     """
@@ -50,4 +50,4 @@ def get_id(api_key, place_id):
     :param place_id:
     :return: see readme
     """
-    return get_current_popular_times(api_key, place_id)
+    return get_populartimes(api_key, place_id)
