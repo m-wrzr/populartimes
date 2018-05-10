@@ -3,14 +3,11 @@
 
 import calendar
 import datetime
-from json import JSONDecodeError
-
 import geopy
 import geopy.distance
 import json
 import logging
 import math
-import os
 import requests
 import ssl
 import threading
@@ -20,9 +17,6 @@ import urllib.parse
 from geopy.distance import vincenty
 from geopy.distance import VincentyDistance
 from queue import Queue
-
-# change for logging visibility
-logging.getLogger().setLevel(logging.INFO)
 
 # urls for google api web service
 radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
