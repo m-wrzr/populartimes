@@ -4,9 +4,9 @@ The goal of this library is to provide an option to use *Google Maps* popular ti
 
 ## How to get started
 + Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 requests/sec add payment information)
-+ `cd` into the populartimes directory and run `pip install .`
-+ `import populartimes` and run with `populartimes.get(...)` or `populartimes.get_id(...)`
++ `clone` the repository, `cd` into the populartimes directory and run `pip install .`
 + Alternatively install directly from github using `pip install --upgrade git+https://github.com/m-wrzr/populartimes`
++ `import populartimes` and run with `populartimes.get(...)` or `populartimes.get_id(...)`
  + **Note**: The library is not available via PyPI, so you have to clone/download the repository and install it locally.
 
 ## populartimes.get_id(...)
@@ -50,7 +50,7 @@ Retrieves information for a given place id and adds populartimes, wait, time_spe
     ],
     "People typically spend 1.5-3.5 hours here"
   ],
-  "populartimes": ([
+  "populartimes": [
     {
       "name": "Monday",
       "data": [0,0,0,0,0,0,0,0,0,0,0,27,37,36,27,0,0,22,36,40,34,27,20,0]
@@ -86,7 +86,7 @@ Retrieves information for a given place id and adds populartimes, wait, time_spe
       ]
     }
   ],
-  [
+  time_wait: [
     {
       "name": "Monday",
       "data": [
@@ -140,7 +140,7 @@ Retrieves information for a given place id and adds populartimes, wait, time_spe
       "name": "Sunday",
       "data": [...]
     }
-  ])
+  ]
 }
  ```
 
