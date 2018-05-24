@@ -8,6 +8,7 @@ import geopy.distance
 import json
 import logging
 import math
+import re
 import requests
 import ssl
 import threading
@@ -146,39 +147,52 @@ def get_popularity_for_day(popularity):
     :param popularity:
     :return:
     """
-    pop_json = [[0 for _ in range(24)] for _ in range(7)]
-    wait_json = [[[0, "Closed"] for _ in range(24)] for _ in range(7)]
+    pop_json, wait_json = [[0 for _ in range(24)] for _ in range(7)], [[0 for _ in range(24)] for _ in range(7)]
 
     for day in popularity:
 
         day_no, pop_times = day[:2]
 
         if pop_times is not None:
-            for el in pop_times:
+            for hour_info in pop_times:
 
-                hour, pop, wait_str = el[0], el[1], el[3],
+                hour = hour_info[0]
+                pop_json[day_no - 1][hour] = hour_info[1]
 
-                pop_json[day_no - 1][hour] = pop
+                # check if the waiting string is available and convert no minutes
+                if len(hour_info) > 5:
+                    wait_digits = re.findall(r'\d+', hour_info[3])
 
-                wait_l = [int(s) for s in wait_str.replace("\xa0", " ").split(" ") if s.isdigit()]
-                wait_json[day_no - 1][hour] = [0 if len(wait_l) == 0 else wait_l[0], wait_str]
+                    if len(wait_digits) == 0:
+                        wait_json[day_no - 1][hour] = 0
+                    elif "min" in hour_info[3]:
+                        wait_json[day_no - 1][hour] = int(wait_digits[0])
+                    elif "hour" in hour_info[3]:
+                        wait_json[day_no - 1][hour] = int(wait_digits[0]) * 60
+                    else:
+                        wait_json[day_no - 1][hour] = int(wait_digits[0]) * 60 + int(wait_digits[1])
 
                 # day wrap
-                if hour == 23:
+                if hour_info[0] == 23:
                     day_no = day_no % 7 + 1
 
+    ret_popularity = [
+        {
+            "name": list(calendar.day_name)[d],
+            "data": pop_json[d]
+        } for d in range(7)
+    ]
+
+    # waiting time only if applicable
+    ret_wait = [
+        {
+            "name": list(calendar.day_name)[d],
+            "data": wait_json[d]
+        } for d in range(7)
+    ] if any(any(d != 0 for d in day) for day in wait_json) else []
+
     # {"name" : "monday", "data": [...]} for each weekday as list
-    return [
-               {
-                   "name": list(calendar.day_name)[d],
-                   "data": pop_json[d]
-               } for d in range(7)
-           ], [
-               {
-                   "name": list(calendar.day_name)[d],
-                   "data": wait_json[d]
-               } for d in range(7)
-           ]
+    return ret_popularity, ret_wait
 
 
 def index_get(array, *argv):
@@ -233,7 +247,9 @@ def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, c
         popularity, wait_times = get_popularity_for_day(popularity)
 
         detail_json["populartimes"] = popularity
-        detail_json["time_wait"] = wait_times
+
+        if len(wait_times) > 0:
+            detail_json["time_wait"] = wait_times
 
     if time_spent is not None:
         detail_json["time_spent"] = time_spent
@@ -250,6 +266,7 @@ def get_populartimes_from_search(place_identifier):
     params_url = {
         "tbm": "map",
         "tch": 1,
+        "hl": "en",
         "q": urllib.parse.quote_plus(place_identifier),
         "pb": "!4m12!1m3!1d4005.9771522653964!2d-122.42072974863942!3d37.8077459796541!2m3!1f0!2f0!3f0!3m2!1i1125!2i976"
               "!4f13.1!7i20!10b1!12m6!2m3!5m1!6e2!20e3!10b1!16b1!19m3!2m2!1i392!2i106!20m61!2m2!1i203!2i100!3m2!2i4!5b1"
@@ -293,14 +310,22 @@ def get_populartimes_from_search(place_identifier):
 
     time_spent = index_get(info, 117, 0)
 
-    # extract numbers from time string
+    # extract wait times and convert to minutes
     if time_spent is not None:
-        time_spent = time_spent.replace("\xa0", " ")
 
-        time_spent = [[
-            float(s) for s in time_spent.replace("-", " ").replace(",", ".").split(" ")
-            if s.replace('.', '', 1).isdigit()
-        ], time_spent]
+        nums = [float(f) for f in re.findall(r'\d*\.\d+|\d+', time_spent.replace(",", "."))]
+        contains_min, contains_hour = "min" in time_spent, "hour" in time_spent or "hr" in time_spent
+
+        time_spent = None
+
+        if contains_min and contains_hour:
+            time_spent = [nums[0], nums[1] * 60]
+        elif contains_hour:
+            time_spent = [nums[0] * 60, (nums[0] if len(nums) == 1 else nums[1]) * 60]
+        elif contains_min:
+            time_spent = [nums[0], nums[0] if len(nums) == 1 else nums[1]]
+
+        time_spent = [int(t) for t in time_spent]
 
     return rating, rating_n, popular_times, current_popularity, time_spent
 
