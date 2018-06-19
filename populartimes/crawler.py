@@ -17,9 +17,11 @@ import urllib.parse
 from geopy.distance import vincenty
 from geopy.distance import VincentyDistance
 from queue import Queue
+from time import sleep
 
 # urls for google api web service
 radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
+nearby_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={},{}&radius={}&types={}&key={}"
 detail_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
 
 # user agent for populartimes request
@@ -105,28 +107,36 @@ def worker_radar():
 
 
 def get_radar(_lat, _lng):
-    # places - radar search - https://developers.google.com/places/web-service/search?hl=de#RadarSearchRequests
-    radar_str = radar_url.format(_lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"])
-    resp = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)
-    check_response_code(resp)
-    radar = resp["results"]
+    # places - nearby search - https://developers.google.com/places/web-service/search?hl=en#PlaceSearchRequests
+    radar_str = nearby_url.format(_lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"])
+    curr_radar_str = radar_str
+    cnt_res = 0
+    while (True):
+        resp = json.loads(requests.get(curr_radar_str, auth=('user', 'pass')).text)
 
-    if len(radar) > 200:
-        logging.warning("more than 200 places in search radius, some data may get lost")
+        check_response_code(resp)
+        radar = resp["results"]
 
-    bounds = params["bounds"]
+        cnt_res += len(radar)
+        if cnt_res >= 60:
+            logging.warning("Result limit in search radius reached, some data may get lost")
 
-    # retrieve google ids for detail search
-    for place in radar:
+        bounds = params["bounds"]
 
-        geo = place["geometry"]["location"]
+        # retrieve google ids for detail search
+        for place in radar:
 
-        if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
-                and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
+            geo = place["geometry"]["location"]
+            if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
+                    and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
 
-            # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
-            if place["place_id"] not in g_place_ids:
-                g_place_ids.add(place["place_id"])
+                # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
+                g_place_ids[place["place_id"]] = place
+        if "next_page_token" in resp:
+            curr_radar_str = radar_str + "&pagetoken=" + resp["next_page_token"]
+            sleep(2) # There is a "short" delay between when a next_page_token is issued, and when it will become valid.
+        else:
+            break
 
 
 def worker_detail():
@@ -310,7 +320,8 @@ def get_detail(place_id):
     loads data for a given area
     :return:
     """
-    detail_json = get_populartimes(params["API_key"], place_id)
+    #detail_json = get_populartimes(params["API_key"], place_id)
+    detail_json = get_populartimes_by_detail(params["API_key"], g_place_ids[place_id])
 
     if params["all_places"] or "populartimes" in detail_json:
         results.append(detail_json)
@@ -329,12 +340,18 @@ def get_populartimes(api_key, place_id):
     check_response_code(resp)
     detail = resp["result"]
 
-    place_identifier = "{} {}".format(detail["name"], detail["formatted_address"])
+    return get_populartimes_by_detail(api_key, detail)
+
+
+def get_populartimes_by_detail(api_key, detail):
+    address = detail["formatted_address"] if "formatted_address" in detail else detail["vicinity"]
+
+    place_identifier = "{} {}".format(detail["name"], address)
 
     detail_json = {
         "id": detail["place_id"],
         "name": detail["name"],
-        "address": detail["formatted_address"],
+        "address": address,
         "types": detail["types"],
         "coordinates": detail["geometry"]["location"]
     }
@@ -384,7 +401,7 @@ def run(_params):
     # shared variables
     params = _params
     q_radar, q_detail = Queue(), Queue()
-    g_place_ids, results = set(), list()
+    g_place_ids, results = dict(), list()
 
     logging.info("Adding places to queue...")
 
