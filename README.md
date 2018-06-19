@@ -22,7 +22,8 @@ Retrieves information for a given place id and adds populartimes, wait, time_spe
 + **Response**
     + The response is formatted is equal to the .json described below.
     + The information present for places is highly varying. Therefore *popularity*, *current_popularity*, *rating*, *rating_n*, *time_wait*, *time_spent* and *phone* are optional return parameters and only present if available.
-   + **Note**: The *time_wait* and *time_spent* parameters were only added recently to Google Maps and are only present as a language specific string. The extracted values may therefore be incorrect and you might have to parse the raw string yourself, depending on your language settings.
+    + *time_wait* and *time_spent* are in minutes
+    + **Note**: The *time_wait* and *time_spent* parameters were only added recently to Google Maps and are only present as a language specific string. The extracted values may therefore be incorrect and you might have to parse the raw string yourself, depending on your language settings.
 
 ```json
 {
@@ -40,109 +41,103 @@ Retrieves information for a given place id and adds populartimes, wait, time_spe
     "lng": -74.007766
   },
   "rating": 4.4,
-  "rating_n": 117,
+  "rating_n": 129,
   "international_phone_number": "+1 212-577-2725",
-  "current_popularity": 47,
-  "time_spent": [
-    [
-      1.5,
-      3.5
-    ],
-    "People typically spend 1.5-3.5 hours here"
+    "time_spent": [
+    90,
+    180
   ],
+  "current_popularity": 33,
   "populartimes": [
     {
       "name": "Monday",
-      "data": [0,0,0,0,0,0,0,0,0,0,0,27,37,36,27,0,0,22,36,40,34,27,20,0]
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 19, 20, 17, 0, 0, 20, 28, 26, 18, 10, 6, 0
+      ]
     },
     {
       "name": "Tuesday",
-      "data": [0,0,0,0,0,0,0,0,0,0,0,26,34,34,25,0,0,40,67,87,86,64,36,0
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 25, 27, 19, 10, 0, 0, 34, 42, 42, 35, 26, 15, 0
       ]
     },
     {
       "name": "Wednesday",
-      "data": [0,0,0,0,0,0,0,0,0,0,0,27,41,46,40,0,0,44,68,81,73,48,22,0
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 34, 23, 13, 0, 0, 36, 46, 47, 39, 26, 13, 0
       ]
     },
     {
       "name": "Thursday",
-      "data": [0,0,0,0,0,0,0,0,0,0,0,17,41,63,58,0,0,74,89,91,77,54,31,0
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 28, 42, 42, 28, 0, 0, 59, 61, 46, 39, 32, 20, 0
       ]
     },
     {
       "name": "Friday",
-      "data": [0,0,0,0,0,0,0,0,0,0,0,31,44,45,39,0,0,53,79,100,100,89,79,0
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 30, 44, 40, 28, 0, 0, 70, 96, 100, 80, 48, 22, 0
       ]
     },
     {
       "name": "Saturday",
-      "data": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,29,39,51,60,56,41,0
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 34, 42, 48, 47, 36, 21, 0
       ]
     },
     {
       "name": "Sunday",
-      "data": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,25,32,40,41,32,18,0
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 34, 34, 28, 21, 10, 0
       ]
     }
   ],
-  time_wait: [
+  "time_wait": [
     {
       "name": "Monday",
       "data": [
-        [0,"Closed"],
-        [0,"Closed"],
-        [0,"Closed"],
-        [0,"Closed"],
-        [0,"Closed"],
-        [0,"Closed"],
-        [0,"None"],
-        [0,"None"],
-        [0,"None"],
-        [0,"None"],
-        [0,"None"],
-        [15,"Up to 15 min"],
-        [15,"Up to 15 min"],
-        [0,"None"],
-        [0,"None"],
-        [0,"None"],
-        [0,"None"],
-        [15,"Up to 15 min"],
-        [15,"Up to 15 min"],
-        [15,"Up to 15 min"],
-        [15,"Up to 15 min"],
-        [15,"Up to 15 min"],
-        [15,"Up to 15 min"],
-        [0,"None"]
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 0, 0, 0, 0, 15, 15, 15, 0, 15, 15, 0
       ]
     },
     {
       "name": "Tuesday",
-      "data": [...]
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 0, 0, 0, 0, 0, 15, 15, 15, 15, 15, 0
+      ]
     },
     {
       "name": "Wednesday",
-      "data": [...]
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 15, 0
+      ]
     },
     {
       "name": "Thursday",
-      "data": [...]
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 0, 0, 0, 0, 0, 15, 15, 15, 15, 15, 0
+      ]
     },
     {
       "name": "Friday",
-      "data": [...]
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 15, 15, 0
+      ]
     },
     {
       "name": "Saturday",
-      "data": [...]
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 15, 15, 0
+      ]
     },
     {
       "name": "Sunday",
-      "data": [...]
+      "data": [
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 15, 15, 0, 0, 0
+      ]
     }
   ]
 }
- ```
+```
 
 
 ## populartimes.get(...)
@@ -163,6 +158,7 @@ Retrieves information for a given area according to place types and bounds. Adds
 
 
 + **Response**
+    + The values are derived from a combination of google searches, google maps app location data, and local traffic data. This data is  then used on a per location basis and gives a weekly (by hour and by day) reading for how busy that particular location is on a scale of 1-100. (1 being the least busy, 100 being the busiest a particular location gets, 0 indicating a time that a location is closed).
     + The data is represented as a list of dictionaries, with responses according to the example above
     + The *populartimes* data for each day is an array of length 24, with populartimes data starting from hour 0 to 23, the *wait* data is formatted similarly,
     + *popularity*, *current_popularity*, *rating*, *rating_n*, *time_wait*, *time_spent* and *phone* are optional return parameters and only present if available.
