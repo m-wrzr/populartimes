@@ -18,7 +18,7 @@ import urllib.parse
 from geopy.distance import vincenty
 from geopy.distance import VincentyDistance
 from queue import Queue
-from time import sleep
+from time import sleep, time
 
 # urls for google api web service
 radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
@@ -103,41 +103,50 @@ def worker_radar():
       """
     while True:
         item = q_radar.get()
-        get_radar(item[0], item[1])
+        get_radar(item)
         q_radar.task_done()
 
 
-def get_radar(_lat, _lng):
+def get_radar(item):
+    _lat, _lng = item["pos"]
     # places - nearby search - https://developers.google.com/places/web-service/search?hl=en#PlaceSearchRequests
     radar_str = nearby_url.format(_lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"])
-    curr_radar_str = radar_str
-    cnt_res = 0
-    while (True):
-        resp = json.loads(requests.get(curr_radar_str, auth=('user', 'pass')).text)
 
-        check_response_code(resp)
-        radar = resp["results"]
+    # is this a next page request?
+    if item["res"] > 0:
+        # possibly wait remaining time until next_page_token becomes valid
+        min_wait = 2 # wait at least 2 seconds before the next page request
+        sec_passed = time() - item["last_req"]
+        if sec_passed < min_wait:
+            sleep(min_wait - sec_passed)
+        radar_str += "&pagetoken=" + item["next_page_token"]
 
-        cnt_res += len(radar)
-        if cnt_res >= 60:
-            logging.warning("Result limit in search radius reached, some data may get lost")
+    resp = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)
+    check_response_code(resp)
 
-        bounds = params["bounds"]
+    radar = resp["results"]
 
-        # retrieve google ids for detail search
-        for place in radar:
+    item["res"] += len(radar)
+    if item["res"] >= 60:
+        logging.warning("Result limit in search radius reached, some data may get lost")
 
-            geo = place["geometry"]["location"]
-            if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
-                    and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
+    bounds = params["bounds"]
 
-                # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
-                g_places[place["place_id"]] = place
-        if "next_page_token" in resp:
-            curr_radar_str = radar_str + "&pagetoken=" + resp["next_page_token"]
-            sleep(2) # There is a "short" delay between when a next_page_token is issued, and when it will become valid.
-        else:
-            break
+    # retrieve google ids for detail search
+    for place in radar:
+
+        geo = place["geometry"]["location"]
+        if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
+                and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
+
+            # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
+            g_places[place["place_id"]] = place
+
+    # if there are more results, schedule next page requests
+    if "next_page_token" in resp:
+        item["next_page_token"] = resp["next_page_token"]
+        item["last_req"] = time()
+        q_radar.put(item)
 
 
 def worker_detail():
@@ -441,7 +450,7 @@ def run(_params):
     for lat, lng in get_circle_centers([bounds["lower"]["lat"], bounds["lower"]["lng"]],  # southwest
                                        [bounds["upper"]["lat"], bounds["upper"]["lng"]],  # northeast
                                        params["radius"]):
-        q_radar.put((lat, lng))
+        q_radar.put(dict(pos=(lat, lng), res=0))
 
     q_radar.join()
     logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
