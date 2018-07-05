@@ -132,7 +132,7 @@ def get_radar(_lat, _lng):
                     and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
 
                 # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
-                g_place_ids[place["place_id"]] = place
+                g_places[place["place_id"]] = place
         if "next_page_token" in resp:
             curr_radar_str = radar_str + "&pagetoken=" + resp["next_page_token"]
             sleep(2) # There is a "short" delay between when a next_page_token is issued, and when it will become valid.
@@ -346,7 +346,7 @@ def get_detail(place_id):
     :return:
     """
     #detail_json = get_populartimes(params["API_key"], place_id)
-    detail_json = get_populartimes_by_detail(params["API_key"], g_place_ids[place_id])
+    detail_json = get_populartimes_by_detail(params["API_key"], g_places[place_id])
 
     if params["all_places"] or "populartimes" in detail_json:
         results.append(detail_json)
@@ -421,12 +421,12 @@ def run(_params):
     """
     start = datetime.datetime.now()
 
-    global params, g_place_ids, q_radar, q_detail, results
+    global params, g_places, q_radar, q_detail, results
 
     # shared variables
     params = _params
     q_radar, q_detail = Queue(), Queue()
-    g_place_ids, results = dict(), list()
+    g_places, results = dict(), list()
 
     logging.info("Adding places to queue...")
 
@@ -446,7 +446,7 @@ def run(_params):
     q_radar.join()
     logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
 
-    logging.info("{} places to process...".format(len(g_place_ids)))
+    logging.info("{} places to process...".format(len(g_places)))
 
     # threading for detail search and popular times
     for i in range(params["n_threads"]):
@@ -454,7 +454,7 @@ def run(_params):
         t.daemon = True
         t.start()
 
-    for g_place_id in g_place_ids:
+    for g_place_id in g_places:
         q_detail.put(g_place_id)
 
     q_detail.join()
