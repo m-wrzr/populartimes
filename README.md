@@ -2,6 +2,8 @@
 # Populartimes  
 The goal of this library is to provide an option to use *Google Maps* popular times data, until it is available via Google's API. As Google Maps is constantly updated this library can  be unstable.
 
+Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. For more information check https://developers.google.com/places/web-service/usage-and-billing
+
 ## How to get started
 + Get a Google Maps API key https://developers.google.com/places/web-service/?hl=de (for more than 1000 requests/sec add payment information)
 + `clone` the repository, `cd` into the populartimes directory and run `pip install .`
