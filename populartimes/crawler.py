@@ -3,30 +3,30 @@
 
 import calendar
 import datetime
-import geopy
-import geopy.distance
 import json
 import logging
 import math
 import re
-import requests
 import ssl
 import threading
 import urllib.request
 import urllib.parse
-
-from geopy.distance import vincenty
-from geopy.distance import VincentyDistance
-from queue import Queue
 from time import sleep, time
+from queue import Queue
+
+import requests
+from geopy import Point
+from geopy.distance import vincenty, VincentyDistance
+
 
 # urls for google api web service
-radar_url = "https://maps.googleapis.com/maps/api/place/radarsearch/json?location={},{}&radius={}&types={}&key={}"
-nearby_url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={},{}&radius={}&types={}&key={}"
-detail_url = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
+BASE_URL = "https://maps.googleapis.com/maps/api/place/"
+RADAR_URL = BASE_URL + "radarsearch/json?location={},{}&radius={}&types={}&key={}"
+NEARBY_URL = BASE_URL + "nearbysearch/json?location={},{}&radius={}&types={}&key={}"
+DETAIL_URL = BASE_URL + "details/json?placeid={}&key={}"
 
 # user agent for populartimes request
-user_agent = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
+USER_AGENT = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
                             "AppleWebKit/537.36 (KHTML, like Gecko) "
                             "Chrome/54.0.2840.98 Safari/537.36"}
 
@@ -47,9 +47,11 @@ class PopulartimesException(Exception):
 def get_circle_centers(b1, b2, radius):
     """
     the function covers the area within the bounds with circles
-    this is done by calculating the lat/lng distances and the number of circles needed to fill the area
-    as these circles only intersect at one point, an additional grid with a (+radius,+radius) offset is used to
-    cover the empty spaces
+    this is done by calculating the lat/lng distances
+    and the number of circles needed to fill the area
+    as these circles only intersect at one point,
+    an additional grid with a (+radius,+radius) offset
+    is used to cover the empty spaces
 
     :param b1: bounds
     :param b2: bounds
@@ -57,12 +59,12 @@ def get_circle_centers(b1, b2, radius):
     :return: list of circle centers that cover the area between lower/upper
     """
 
-    sw = geopy.Point(b1)
-    ne = geopy.Point(b2)
+    sw = Point(b1)
+    ne = Point(b2)
 
     # north/east distances
-    dist_lat = int(vincenty(geopy.Point(sw[0], sw[1]), geopy.Point(ne[0], sw[1])).meters)
-    dist_lng = int(vincenty(geopy.Point(sw[0], sw[1]), geopy.Point(sw[0], ne[1])).meters)
+    dist_lat = int(vincenty(Point(sw[0], sw[1]), Point(ne[0], sw[1])).meters)
+    dist_lng = int(vincenty(Point(sw[0], sw[1]), Point(sw[0], ne[1])).meters)
 
     def cover(p_start, n_lat, n_lng, r):
         _coords = []
@@ -76,21 +78,25 @@ def get_circle_centers(b1, b2, radius):
 
         return _coords
 
+    def _calc_base(dist):
+        """ Calculation for base cover """
+        return math.ceil((dist - radius) / (2 * radius)) + 1
+
+    def _calc_offset(dist):
+        """ Calculation for offset cover """
+        return math.ceil((dist - 2 * radius) / (2 * radius)) + 1
+
     coords = []
 
     # get circles for base cover
-    coords += cover(sw,
-                    math.ceil((dist_lat - radius) / (2 * radius)) + 1,
-                    math.ceil((dist_lng - radius) / (2 * radius)) + 1, radius)
+    coords += cover(sw, _calc_base(dist_lat), _calc_base(dist_lng), radius)
 
     # update south-west for second cover
     vc_radius = VincentyDistance(meters=radius)
     sw = vc_radius.destination(vc_radius.destination(point=sw, bearing=0), bearing=90)
 
     # get circles for offset cover
-    coords += cover(sw,
-                    math.ceil((dist_lat - 2 * radius) / (2 * radius)) + 1,
-                    math.ceil((dist_lng - 2 * radius) / (2 * radius)) + 1, radius)
+    coords += cover(sw, _calc_offset(dist_lat), _calc_offset(dist_lng), radius)
 
     # only return the coordinates
     return [c[:2] for c in coords]
@@ -109,13 +115,17 @@ def worker_radar():
 
 def get_radar(item):
     _lat, _lng = item["pos"]
-    # places - nearby search - https://developers.google.com/places/web-service/search?hl=en#PlaceSearchRequests
-    radar_str = nearby_url.format(_lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"])
+
+    # places - nearby search
+    # https://developers.google.com/places/web-service/search?hl=en#PlaceSearchRequests
+    radar_str = NEARBY_URL.format(
+        _lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"]
+    )
 
     # is this a next page request?
     if item["res"] > 0:
         # possibly wait remaining time until next_page_token becomes valid
-        min_wait = 2 # wait at least 2 seconds before the next page request
+        min_wait = 2  # wait at least 2 seconds before the next page request
         sec_passed = time() - item["last_req"]
         if sec_passed < min_wait:
             sleep(min_wait - sec_passed)
@@ -139,7 +149,8 @@ def get_radar(item):
         if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
                 and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
 
-            # this isn't thread safe, but we don't really care, since at worst, a set entry is simply overwritten
+            # this isn't thread safe, but we don't really care,
+            # since in worst case a set entry is simply overwritten
             g_places[place["place_id"]] = place
 
     # if there are more results, schedule next page requests
@@ -162,17 +173,20 @@ def worker_detail():
 
 def get_popularity_for_day(popularity):
     """
-
+    Returns popularity for day
     :param popularity:
     :return:
     """
-    pop_json, wait_json = [[0 for _ in range(24)] for _ in range(7)], [[0 for _ in range(24)] for _ in range(7)]
+
+    # Initialize empty matrix with 0s
+    pop_json = [[0 for _ in range(24)] for _ in range(7)]
+    wait_json = [[0 for _ in range(24)] for _ in range(7)]
 
     for day in popularity:
 
         day_no, pop_times = day[:2]
 
-        if pop_times is not None:
+        if pop_times:
             for hour_info in pop_times:
 
                 hour = hour_info[0]
@@ -208,7 +222,7 @@ def get_popularity_for_day(popularity):
             "name": list(calendar.day_name)[d],
             "data": wait_json[d]
         } for d in range(7)
-    ] if any(any(d != 0 for d in day) for day in wait_json) else []
+    ] if any(any(day) for day in wait_json) else []
 
     # {"name" : "monday", "data": [...]} for each weekday as list
     return ret_popularity, ret_wait
@@ -248,29 +262,29 @@ def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, c
     :return:
     """
 
-    if rating is not None:
+    if rating:
         detail_json["rating"] = rating
     elif "rating" in detail:
         detail_json["rating"] = detail["rating"]
 
-    if rating_n is not None:
+    if rating_n:
         detail_json["rating_n"] = rating_n
 
     if "international_phone_number" in detail:
         detail_json["international_phone_number"] = detail["international_phone_number"]
 
-    if current_popularity is not None:
+    if current_popularity:
         detail_json["current_popularity"] = current_popularity
 
-    if popularity is not None:
+    if popularity:
         popularity, wait_times = get_popularity_for_day(popularity)
 
         detail_json["populartimes"] = popularity
 
-        if len(wait_times) > 0:
+        if wait_times:
             detail_json["time_wait"] = wait_times
 
-    if time_spent is not None:
+    if time_spent:
         detail_json["time_spent"] = time_spent
 
     return detail_json
@@ -304,7 +318,7 @@ def get_populartimes_from_search(place_identifier):
     # noinspection PyUnresolvedReferences
     gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
 
-    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=user_agent),
+    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=USER_AGENT),
                                   context=gcontext)
     data = resp.read().decode('utf-8').split('/*""*/')[0]
 
@@ -330,7 +344,7 @@ def get_populartimes_from_search(place_identifier):
     time_spent = index_get(info, 117, 0)
 
     # extract wait times and convert to minutes
-    if time_spent is not None:
+    if time_spent:
 
         nums = [float(f) for f in re.findall(r'\d*\.\d+|\d+', time_spent.replace(",", "."))]
         contains_min, contains_hour = "min" in time_spent, "hour" in time_spent or "hr" in time_spent
@@ -354,7 +368,9 @@ def get_detail(place_id):
     loads data for a given area
     :return:
     """
-    #detail_json = get_populartimes(params["API_key"], place_id)
+    global results
+
+    # detail_json = get_populartimes(params["API_key"], place_id)
     detail_json = get_populartimes_by_detail(params["API_key"], g_places[place_id])
 
     if params["all_places"] or "populartimes" in detail_json:
@@ -363,13 +379,15 @@ def get_detail(place_id):
 
 def get_populartimes(api_key, place_id):
     """
-    sends request to detail to get a search string and uses standard proto buffer to get additional information
+    sends request to detail to get a search string
+    and uses standard proto buffer to get additional information
     on the current status of popular times
     :return: json details
     """
 
-    # places api - detail search - https://developers.google.com/places/web-service/details?hl=de
-    detail_str = detail_url.format(place_id, api_key)
+    # places api - detail search
+    # https://developers.google.com/places/web-service/details?hl=de
+    detail_str = DETAIL_URL.format(place_id, api_key)
     resp = json.loads(requests.get(detail_str, auth=('user', 'pass')).text)
     check_response_code(resp)
     detail = resp["result"]
@@ -428,9 +446,9 @@ def run(_params):
     wrap execution logic in method, for later external call
     :return:
     """
-    start = datetime.datetime.now()
-
     global params, g_places, q_radar, q_detail, results
+
+    start = datetime.datetime.now()
 
     # shared variables
     params = _params
