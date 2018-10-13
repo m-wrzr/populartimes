@@ -18,7 +18,6 @@ import requests
 from geopy import Point
 from geopy.distance import vincenty, VincentyDistance
 
-
 # urls for google api web service
 BASE_URL = "https://maps.googleapis.com/maps/api/place/"
 RADAR_URL = BASE_URL + "radarsearch/json?location={},{}&radius={}&types={}&key={}"
@@ -148,7 +147,6 @@ def get_radar(item):
         geo = place["geometry"]["location"]
         if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
                 and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
-
             # this isn't thread safe, but we don't really care,
             # since in worst case a set entry is simply overwritten
             g_places[place["place_id"]] = place
@@ -436,6 +434,15 @@ def check_response_code(resp):
         raise PopulartimesException("Google Places " + resp["status"],
                                     "The query string is malformed, "
                                     "check if your formatting for lat/lng and radius is correct.")
+
+    if resp["status"] == "INVALID_REQUEST":
+        raise PopulartimesException("Google Places " + resp["status"],
+                                    "The query string is malformed, "
+                                    "check if your formatting for lat/lng and radius is correct.")
+
+    if resp["status"] == "NOT_FOUND":
+        raise PopulartimesException("Google Places " + resp["status"],
+                                    "The place ID was not found and either does not exist or was retired.")
 
     raise PopulartimesException("Google Places " + resp["status"],
                                 "Unidentified error with the Places API, please check the response code")
