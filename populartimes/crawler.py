@@ -43,17 +43,52 @@ class PopulartimesException(Exception):
         self.message = message
 
 
+def cover_rect_with_cicles(w, h, r):
+    """
+    fully cover a rectangle of given width and height with
+    circles of radius r. This algorithm uses a hexagonal
+    honeycomb pattern to cover the area.
+
+    :param w: width of rectangle
+    :param h: height of reclangle
+    :param r: radius of circles
+    :return: list of circle centers (x,y)
+    """
+
+    #initialize result list
+    res = []
+
+    # horizontal distance between circle centers
+    x_dist = math.sqrt(3) * r
+    # vertical distance between circle centers
+    y_dist = 1.5 * r
+    # number of circles per row (different for even/odd rows)
+    cnt_x_even = math.ceil(w / x_dist)
+    cnt_x_odd = math.ceil((w - x_dist/2) / x_dist) + 1
+    # number of rows
+    cnt_y = math.ceil((h-r) / y_dist) + 1
+
+    y_offs = 0.5 * r
+    for y in range(cnt_y):
+        if y % 2 == 0:
+            # shift even rows to the right
+            x_offs = x_dist/2
+            cnt_x = cnt_x_even
+        else:
+            x_offs = 0
+            cnt_x = cnt_x_odd
+
+        for x in range(cnt_x):
+            res.append((x_offs + x*x_dist, y_offs + y*y_dist))
+
+    return res
+
 def get_circle_centers(b1, b2, radius):
     """
     the function covers the area within the bounds with circles
-    this is done by calculating the lat/lng distances
-    and the number of circles needed to fill the area
-    as these circles only intersect at one point,
-    an additional grid with a (+radius,+radius) offset
-    is used to cover the empty spaces
 
-    :param b1: bounds
-    :param b2: bounds
+    :param b1: south-west bounds [lat, lng]
+    :param b2: north-east bounds [lat, lng]
     :param radius: specified radius, adapt for high density areas
     :return: list of circle centers that cover the area between lower/upper
     """
@@ -65,40 +100,18 @@ def get_circle_centers(b1, b2, radius):
     dist_lat = int(vincenty(Point(sw[0], sw[1]), Point(ne[0], sw[1])).meters)
     dist_lng = int(vincenty(Point(sw[0], sw[1]), Point(sw[0], ne[1])).meters)
 
-    def cover(p_start, n_lat, n_lng, r):
-        _coords = []
+    circles = cover_rect_with_cicles(dist_lat, dist_lng, radius)
+    cords = [
+        VincentyDistance(meters=c[0])
+        .destination(
+            VincentyDistance(meters=c[1])
+            .destination(point=sw, bearing=90),
+            bearing=0
+        )[:2]
+        for c in circles
+    ]
 
-        for i in range(n_lat):
-            for j in range(n_lng):
-                v_north = VincentyDistance(meters=i * r * 2)
-                v_east = VincentyDistance(meters=j * r * 2)
-
-                _coords.append(v_north.destination(v_east.destination(point=p_start, bearing=90), bearing=0))
-
-        return _coords
-
-    def _calc_base(dist):
-        """ Calculation for base cover """
-        return math.ceil((dist - radius) / (2 * radius)) + 1
-
-    def _calc_offset(dist):
-        """ Calculation for offset cover """
-        return math.ceil((dist - 2 * radius) / (2 * radius)) + 1
-
-    coords = []
-
-    # get circles for base cover
-    coords += cover(sw, _calc_base(dist_lat), _calc_base(dist_lng), radius)
-
-    # update south-west for second cover
-    vc_radius = VincentyDistance(meters=radius)
-    sw = vc_radius.destination(vc_radius.destination(point=sw, bearing=0), bearing=90)
-
-    # get circles for offset cover
-    coords += cover(sw, _calc_offset(dist_lat), _calc_offset(dist_lng), radius)
-
-    # only return the coordinates
-    return [c[:2] for c in coords]
+    return cords
 
 
 def worker_radar():
