@@ -5,7 +5,7 @@ The goal of this library is to provide an option to use *Google Maps* popular ti
 Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. For more information check https://developers.google.com/places/web-service/usage-and-billing
 
 ## How to get started
-+ Get a Google Maps API key https://developers.google.com/places/web-service (for more than 1000 requests/sec add payment information)
++ Get a Google Maps API key https://developers.google.com/places/web-service/get-api-key (for more than 1000 requests/sec add payment information)
 + `clone` the repository, `cd` into the populartimes directory and run `pip install .`
 + Alternatively install directly from github using `pip install --upgrade git+https://github.com/m-wrzr/populartimes`
 + `import populartimes` and run with `populartimes.get(...)` or `populartimes.get_id(...)`
