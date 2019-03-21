@@ -1,30 +1,37 @@
 from populartimes.crawler import get_circle_centers
+import random
+from geopy import Point
+from geopy.distance import vincenty, VincentyDistance
 
+
+def generate_testcases():
+    # origin (south-west)
+    sw = [48.132986, 11.566126]
+    # width, height, radius in meters
+    for w in [1, 10, 80, 200, 1000, 5000]:
+        for h in [1, 20, 300, 1000, 20000]:
+            for r in [180, 500]:
+                # north-east (se + width/height)
+                ne = VincentyDistance(meters=w).destination(
+                    VincentyDistance(meters=h)
+                    .destination(point=sw, bearing=90),
+                    bearing=0
+                )[:2]
+                circles = get_circle_centers(sw, ne, r)
+                yield (sw, ne, w, h, r, circles)
 
 def test_get_circle_centers():
-    circle_centers = get_circle_centers(
-        b1=[48.132986, 11.566126], b2=[48.142199, 11.580047], radius=180
-    )
-
-    assert circle_centers == [
-        (48.13438792255016, 11.567335135224921),
-        (48.137191779339744, 11.567335135224921),
-        (48.139995634754655, 11.567335135224921),
-        (48.14279948879493, 11.567335135224921),
-        (48.13298589823778, 11.570962540893714),
-        (48.135789755714754, 11.570962540893714),
-        (48.13859361181704, 11.570962540893714),
-        (48.14139746654468, 11.570962540893714),
-        (48.13438761726354, 11.574589946541003),
-        (48.13719147405328, 11.574589946541003),
-        (48.139995329468334, 11.574589946541003),
-        (48.14279918350877, 11.574589946541003),
-        (48.13298536398607, 11.578217352150666),
-        (48.13578922146331, 11.578217352150666),
-        (48.138593077565865, 11.578217352150666),
-        (48.14139693229376, 11.578217352150666),
-        (48.13438685404702, 11.581844757706575),
-        (48.13719071083713, 11.581844757706575),
-        (48.139994566252575, 11.581844757706575),
-        (48.14279842029337, 11.581844757706575)
-    ]
+    # test if circles fully cover the rect
+    for sw, ne, w, h, r, circles in generate_testcases():
+        # test with 1000 random points
+        for tst in range(1000):
+            # choose random point within rect
+            p = (random.uniform(0,w), random.uniform(0,h))
+            # translate to lat/lng
+            pp = VincentyDistance(meters=p[0]).destination(
+                VincentyDistance(meters=p[1])
+                .destination(point=sw, bearing=90),
+                bearing=0
+            )
+            # check if point is contained in any of the calculated circles
+            assert any([vincenty(pp, Point(c[0], c[1])).meters <= r for c in circles])
