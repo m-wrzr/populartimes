@@ -18,8 +18,8 @@ def get(api_key, types, p1, p2, n_threads=20, radius=180, all_places=False):
     """
     :param api_key: str; api key from google places web service
     :param types: [str]; placetypes
-    :param p1: (float, float); lat/lng of a delimiting point
-    :param p2: (float, float); lat/lng of a delimiting point
+    :param p1: (float, float); lat/lng of the south-west delimiting point
+    :param p2: (float, float); lat/lng of the north-east delimiting point
     :param n_threads: int; number of threads to use
     :param radius: int; meters;
     :param all_places: bool; include/exclude places without populartimes
