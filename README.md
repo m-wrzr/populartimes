@@ -2,7 +2,9 @@
 # Populartimes  
 The goal of this library is to provide an option to use *Google Maps* popular times data, until it is available via Google's API. As Google Maps is constantly updated this library can  be unstable.
 
-Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. The API call is SKU'd as "Find Current Place" with additional Data SKUs (Basic Data, Contact Data, Atmosphere Data).  As of February 2018, you can make 5000 calls with the alloted monthly budget.  For more information check https://developers.google.com/places/web-service/usage-and-billing and https://cloud.google.com/maps-platform/pricing/sheet/#places.  
+Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. 
+As of February 2018, you can make 5000 calls with the allotted monthly budget. 
+For more information check https://developers.google.com/places/web-service/usage-and-billing and https://cloud.google.com/maps-platform/pricing/sheet/#places.  
 
 ## How to get started
 + Get a Google Maps API key https://developers.google.com/places/web-service/get-api-key 
@@ -142,28 +144,15 @@ Retrieves information for a given place id and adds populartimes, wait, time_spe
 ```
 
 
-## populartimes.get(...)
+## populartimes.get(...) - REMOVED
 
-Retrieves information for a given area according to place types and bounds. Adds populartimes, wait, time_spent and other data not accessible via Google Places.
+Has been removed, as this used the **Google Places Nearby Search** endpoint which is expensive 
+(refer to https://developers.google.com/places/web-service/search#PlaceSearchRequests) and the places API does not support covering a specified area itself.
 
-+ **populartimes.get**(api_key, types, bound_lower, bound_upper, n_threads (opt), radius (opt), all_places (opt))
-    + **api_key** str; api key from google places web service; e.g. "your-api-key"
-    + **types** [str]; placetypes; see https://developers.google.com/places/supported_types; e.g. ["bar"]
-    + **p1** (float, float); lat/lng of point delimiting the search area; e.g. (48.132986, 11.566126)
-    + **p2** (float, float); lat/lng of point delimiting the search area; e.g. (48.142199, 11.580047)
-    + **n_threads (opt)** int; number of threads used; e.g. 20
-    + **radius (opt)** int; meters; up to 50,000 for radar search; e.g. 180; this has can be adapted for very dense areas
-    + **all_places (opt)** bool; include/exclude places without populartimes
-
-+ **Example call**
-    + populartimes.get("your-api-key", ["bar"], (48.132986, 11.566126), (48.142199, 11.580047))
+Please implement your own covering algorithm to get all place IDs that you're interested in and call ````get_id()````.
+If you want to used the ````get()```` call please checkout a previous version and use it at your own caution 
+(be aware that there have been cases where this lead to a high amount of API requests, which were billed by Google Maps).
 
 
-+ **Response**
-    + The values are derived from a combination of google searches, google maps app location data, and local traffic data. This data is  then used on a per location basis and gives a weekly (by hour and by day) reading for how busy that particular location is on a scale of 1-100. (1 being the least busy, 100 being the busiest a particular location gets, 0 indicating a time that a location is closed).
-    + The data is represented as a list of dictionaries, with responses according to the example above
-    + The *populartimes* data for each day is an array of length 24, with populartimes data starting from hour 0 to 23, the *wait* data is formatted similarly,
-    + *popularity*, *current_popularity*, *rating*, *rating_n*, *time_wait*, *time_spent* and *phone* are optional return parameters and only present if available.
-  
  ## Example how the data can be used for visualization  
  ![Bars-Gif](/content/bars_visualization.gif "Bars Munich,Berlin,Barcelona, London")

@@ -2,27 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import calendar
-import datetime
 import json
 import logging
-import math
 import re
+import requests
 import ssl
-import threading
 import urllib.request
 import urllib.parse
-from time import sleep, time
-from queue import Queue
-
-import requests
-from geopy import Point
-from geopy.distance import vincenty, VincentyDistance
 
 # urls for google api web service
-BASE_URL = "https://maps.googleapis.com/maps/api/place/"
-RADAR_URL = BASE_URL + "radarsearch/json?location={},{}&radius={}&types={}&key={}"
-NEARBY_URL = BASE_URL + "nearbysearch/json?location={},{}&radius={}&types={}&key={}"
-DETAIL_URL = BASE_URL + "details/json?placeid={}&key={}"
+DETAIL_URL = "https://maps.googleapis.com/maps/api/place/details/json?placeid={}&key={}"
 
 # user agent for populartimes request
 USER_AGENT = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) "
@@ -41,173 +30,6 @@ class PopulartimesException(Exception):
     def __init__(self, expression, message):
         self.expression = expression
         self.message = message
-
-
-def rect_circle_collision(rect_left, rect_right, rect_bottom, rect_top, circle_x, circle_y, radius):
-    # returns true iff circle intersects rectangle
-
-    def clamp(val, min, max):
-        # limits value to the range min..max
-        if val < min:
-            return min
-        if val > max:
-            return max
-        return val
-
-    # Find the closest point to the circle within the rectangle
-    closest_x = clamp(circle_x, rect_left, rect_right);
-    closest_y = clamp(circle_y, rect_bottom, rect_top);
-
-    # Calculate the distance between the circle's center and this closest point
-    dist_x = circle_x - closest_x;
-    dist_y = circle_y - closest_y;
-
-    # If the distance is less than the circle's radius, an intersection occurs
-    dist_sq = (dist_x * dist_x) + (dist_y * dist_y);
-
-    return dist_sq < (radius * radius);
-
-def cover_rect_with_cicles(w, h, r):
-    """
-    fully cover a rectangle of given width and height with
-    circles of radius r. This algorithm uses a hexagonal
-    honeycomb pattern to cover the area.
-
-    :param w: width of rectangle
-    :param h: height of reclangle
-    :param r: radius of circles
-    :return: list of circle centers (x,y)
-    """
-
-    #initialize result list
-    res = []
-
-    # horizontal distance between circle centers
-    x_dist = math.sqrt(3) * r
-    # vertical distance between circle centers
-    y_dist = 1.5 * r
-    # number of circles per row (different for even/odd rows)
-    cnt_x_even = math.ceil(w / x_dist)
-    cnt_x_odd = math.ceil((w - x_dist/2) / x_dist) + 1
-    # number of rows
-    cnt_y = math.ceil((h-r) / y_dist) + 1
-
-    y_offs = 0.5 * r
-    for y in range(cnt_y):
-        if y % 2 == 0:
-            # shift even rows to the right
-            x_offs = x_dist/2
-            cnt_x = cnt_x_even
-        else:
-            x_offs = 0
-            cnt_x = cnt_x_odd
-
-        for x in range(cnt_x):
-            res.append((x_offs + x*x_dist, y_offs + y*y_dist))
-
-    # top-right circle is not always required
-    if res and not rect_circle_collision(0, w, 0, h, res[-1][0], res[-1][1], r):
-        res = res[0:-1]
-
-    return res
-
-def get_circle_centers(b1, b2, radius):
-    """
-    the function covers the area within the bounds with circles
-
-    :param b1: south-west bounds [lat, lng]
-    :param b2: north-east bounds [lat, lng]
-    :param radius: specified radius, adapt for high density areas
-    :return: list of circle centers that cover the area between lower/upper
-    """
-
-    sw = Point(b1)
-    ne = Point(b2)
-
-    # north/east distances
-    dist_lat = vincenty(Point(sw[0], sw[1]), Point(ne[0], sw[1])).meters
-    dist_lng = vincenty(Point(sw[0], sw[1]), Point(sw[0], ne[1])).meters
-
-    circles = cover_rect_with_cicles(dist_lat, dist_lng, radius)
-    cords = [
-        VincentyDistance(meters=c[0])
-        .destination(
-            VincentyDistance(meters=c[1])
-            .destination(point=sw, bearing=90),
-            bearing=0
-        )[:2]
-        for c in circles
-    ]
-
-    return cords
-
-
-def worker_radar():
-    """
-      worker that gets coordinates of queue and starts radar search
-      :return:
-      """
-    while True:
-        item = q_radar.get()
-        get_radar(item)
-        q_radar.task_done()
-
-
-def get_radar(item):
-    _lat, _lng = item["pos"]
-
-    # places - nearby search
-    # https://developers.google.com/places/web-service/search?hl=en#PlaceSearchRequests
-    radar_str = NEARBY_URL.format(
-        _lat, _lng, params["radius"], "|".join(params["type"]), params["API_key"]
-    )
-
-    # is this a next page request?
-    if item["res"] > 0:
-        # possibly wait remaining time until next_page_token becomes valid
-        min_wait = 2  # wait at least 2 seconds before the next page request
-        sec_passed = time() - item["last_req"]
-        if sec_passed < min_wait:
-            sleep(min_wait - sec_passed)
-        radar_str += "&pagetoken=" + item["next_page_token"]
-
-    resp = json.loads(requests.get(radar_str, auth=('user', 'pass')).text)
-    check_response_code(resp)
-
-    radar = resp["results"]
-
-    item["res"] += len(radar)
-    if item["res"] >= 60:
-        logging.warning("Result limit in search radius reached, some data may get lost")
-
-    bounds = params["bounds"]
-
-    # retrieve google ids for detail search
-    for place in radar:
-
-        geo = place["geometry"]["location"]
-        if bounds["lower"]["lat"] <= geo["lat"] <= bounds["upper"]["lat"] \
-                and bounds["lower"]["lng"] <= geo["lng"] <= bounds["upper"]["lng"]:
-            # this isn't thread safe, but we don't really care,
-            # since in worst case a set entry is simply overwritten
-            g_places[place["place_id"]] = place
-
-    # if there are more results, schedule next page requests
-    if "next_page_token" in resp:
-        item["next_page_token"] = resp["next_page_token"]
-        item["last_req"] = time()
-        q_radar.put(item)
-
-
-def worker_detail():
-    """
-    worker that gets item of queue and starts detailed data retrieval
-    :return:
-    """
-    while True:
-        item = q_detail.get()
-        get_detail(item)
-        q_detail.task_done()
 
 
 def get_popularity_for_day(popularity):
@@ -402,20 +224,6 @@ def get_populartimes_from_search(place_identifier):
     return rating, rating_n, popular_times, current_popularity, time_spent
 
 
-def get_detail(place_id):
-    """
-    loads data for a given area
-    :return:
-    """
-    global results
-
-    # detail_json = get_populartimes(params["API_key"], place_id)
-    detail_json = get_populartimes_by_detail(params["API_key"], g_places[place_id])
-
-    if params["all_places"] or "populartimes" in detail_json:
-        results.append(detail_json)
-
-
 def get_populartimes(api_key, place_id):
     """
     sends request to detail to get a search string
@@ -431,10 +239,10 @@ def get_populartimes(api_key, place_id):
     check_response_code(resp)
     detail = resp["result"]
 
-    return get_populartimes_by_detail(api_key, detail)
+    return get_populartimes_by_detail(detail)
 
 
-def get_populartimes_by_detail(api_key, detail):
+def get_populartimes_by_detail(detail):
     address = detail["formatted_address"] if "formatted_address" in detail else detail.get("vicinity", "")
 
     place_identifier = "{} {}".format(detail["name"], address)
@@ -447,14 +255,12 @@ def get_populartimes_by_detail(api_key, detail):
         "coordinates": detail["geometry"]["location"]
     }
 
-    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
-
-    return detail_json
+    return add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
 
 
 def check_response_code(resp):
     """
-    check if query quota has been surpassed or other errors occured
+    check if query quota has been surpassed or other errors occurred
     :param resp: json response
     :return:
     """
@@ -487,52 +293,3 @@ def check_response_code(resp):
 
     raise PopulartimesException("Google Places " + resp["status"],
                                 "Unidentified error with the Places API, please check the response code")
-
-
-def run(_params):
-    """
-    wrap execution logic in method, for later external call
-    :return:
-    """
-    global params, g_places, q_radar, q_detail, results
-
-    start = datetime.datetime.now()
-
-    # shared variables
-    params = _params
-    q_radar, q_detail = Queue(), Queue()
-    g_places, results = dict(), list()
-
-    logging.info("Adding places to queue...")
-
-    # threading for radar search
-    for i in range(params["n_threads"]):
-        t = threading.Thread(target=worker_radar)
-        t.daemon = True
-        t.start()
-
-    # cover search area with circles
-    bounds = params["bounds"]
-    for lat, lng in get_circle_centers([bounds["lower"]["lat"], bounds["lower"]["lng"]],  # southwest
-                                       [bounds["upper"]["lat"], bounds["upper"]["lng"]],  # northeast
-                                       params["radius"]):
-        q_radar.put(dict(pos=(lat, lng), res=0))
-
-    q_radar.join()
-    logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
-
-    logging.info("{} places to process...".format(len(g_places)))
-
-    # threading for detail search and popular times
-    for i in range(params["n_threads"]):
-        t = threading.Thread(target=worker_detail)
-        t.daemon = True
-        t.start()
-
-    for g_place_id in g_places:
-        q_detail.put(g_place_id)
-
-    q_detail.join()
-    logging.info("Finished in: {}".format(str(datetime.datetime.now() - start)))
-
-    return results
