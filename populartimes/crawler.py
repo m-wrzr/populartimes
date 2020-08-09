@@ -16,7 +16,7 @@ from queue import Queue
 
 import requests
 from geopy import Point
-from geopy.distance import vincenty, VincentyDistance
+from geopy.distance import geodesic, GeodesicDistance
 
 # urls for google api web service
 BASE_URL = "https://maps.googleapis.com/maps/api/place/"
@@ -125,14 +125,14 @@ def get_circle_centers(b1, b2, radius):
     ne = Point(b2)
 
     # north/east distances
-    dist_lat = vincenty(Point(sw[0], sw[1]), Point(ne[0], sw[1])).meters
-    dist_lng = vincenty(Point(sw[0], sw[1]), Point(sw[0], ne[1])).meters
+    dist_lat = geodesic(Point(sw[0], sw[1]), Point(ne[0], sw[1])).meters
+    dist_lng = geodesic(Point(sw[0], sw[1]), Point(sw[0], ne[1])).meters
 
     circles = cover_rect_with_cicles(dist_lat, dist_lng, radius)
     cords = [
-        VincentyDistance(meters=c[0])
+        GeodesicDistance(meters=c[0])
         .destination(
-            VincentyDistance(meters=c[1])
+            GeodesicDistance(meters=c[1])
             .destination(point=sw, bearing=90),
             bearing=0
         )[:2]
