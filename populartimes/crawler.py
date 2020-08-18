@@ -9,10 +9,10 @@ import math
 import re
 import ssl
 import threading
-import urllib.request
 import urllib.parse
-from time import sleep, time
+import urllib.request
 from queue import Queue
+from time import sleep, time
 
 import requests
 from geopy import Point
@@ -55,17 +55,18 @@ def rect_circle_collision(rect_left, rect_right, rect_bottom, rect_top, circle_x
         return val
 
     # Find the closest point to the circle within the rectangle
-    closest_x = clamp(circle_x, rect_left, rect_right);
-    closest_y = clamp(circle_y, rect_bottom, rect_top);
+    closest_x = clamp(circle_x, rect_left, rect_right)
+    closest_y = clamp(circle_y, rect_bottom, rect_top)
 
     # Calculate the distance between the circle's center and this closest point
-    dist_x = circle_x - closest_x;
-    dist_y = circle_y - closest_y;
+    dist_x = circle_x - closest_x
+    dist_y = circle_y - closest_y
 
     # If the distance is less than the circle's radius, an intersection occurs
-    dist_sq = (dist_x * dist_x) + (dist_y * dist_y);
+    dist_sq = (dist_x * dist_x) + (dist_y * dist_y)
 
-    return dist_sq < (radius * radius);
+    return dist_sq < (radius * radius)
+
 
 def cover_rect_with_cicles(w, h, r):
     """
@@ -79,7 +80,7 @@ def cover_rect_with_cicles(w, h, r):
     :return: list of circle centers (x,y)
     """
 
-    #initialize result list
+    # initialize result list
     res = []
 
     # horizontal distance between circle centers
@@ -88,28 +89,29 @@ def cover_rect_with_cicles(w, h, r):
     y_dist = 1.5 * r
     # number of circles per row (different for even/odd rows)
     cnt_x_even = math.ceil(w / x_dist)
-    cnt_x_odd = math.ceil((w - x_dist/2) / x_dist) + 1
+    cnt_x_odd = math.ceil((w - x_dist / 2) / x_dist) + 1
     # number of rows
-    cnt_y = math.ceil((h-r) / y_dist) + 1
+    cnt_y = math.ceil((h - r) / y_dist) + 1
 
     y_offs = 0.5 * r
     for y in range(cnt_y):
         if y % 2 == 0:
             # shift even rows to the right
-            x_offs = x_dist/2
+            x_offs = x_dist / 2
             cnt_x = cnt_x_even
         else:
             x_offs = 0
             cnt_x = cnt_x_odd
 
         for x in range(cnt_x):
-            res.append((x_offs + x*x_dist, y_offs + y*y_dist))
+            res.append((x_offs + x * x_dist, y_offs + y * y_dist))
 
     # top-right circle is not always required
     if res and not rect_circle_collision(0, w, 0, h, res[-1][0], res[-1][1], r):
         res = res[0:-1]
 
     return res
+
 
 def get_circle_centers(b1, b2, radius):
     """
@@ -131,9 +133,9 @@ def get_circle_centers(b1, b2, radius):
     circles = cover_rect_with_cicles(dist_lat, dist_lng, radius)
     cords = [
         GeodesicDistance(meters=c[0])
-        .destination(
+            .destination(
             GeodesicDistance(meters=c[1])
-            .destination(point=sw, bearing=90),
+                .destination(point=sw, bearing=90),
             bearing=0
         )[:2]
         for c in circles
@@ -329,12 +331,15 @@ def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, c
     return detail_json
 
 
-def get_populartimes_from_search(place_identifier):
+def get_populartimes_from_search(name, address):
     """
     request information for a place and parse current popularity
-    :param place_identifier: name and address string
+    :param name: name string
+    :param address: address string for checking if numbered address
     :return:
     """
+    place_identifier = "{} {}".format(name, address)
+
     params_url = {
         "tbm": "map",
         "tch": 1,
@@ -369,8 +374,10 @@ def get_populartimes_from_search(place_identifier):
     jdata = json.loads(data)["d"]
     jdata = json.loads(jdata[4:])
 
-    # get info from result array, has to be adapted if backend api changes
-    info = index_get(jdata, 0, 1, 0, 14)
+    # check if proper and numeric address, i.e. multiple components and street number
+    is_proper_address = any(char.isspace() for char in address.strip()) and any(char.isdigit() for char in address)
+
+    info = index_get(jdata, 0, 1, 0 if is_proper_address else 1, 14)
 
     rating = index_get(info, 4, 7)
     rating_n = index_get(info, 4, 8)
@@ -437,8 +444,6 @@ def get_populartimes(api_key, place_id):
 def get_populartimes_by_detail(api_key, detail):
     address = detail["formatted_address"] if "formatted_address" in detail else detail.get("vicinity", "")
 
-    place_identifier = "{} {}".format(detail["name"], address)
-
     detail_json = {
         "id": detail["place_id"],
         "name": detail["name"],
@@ -447,7 +452,9 @@ def get_populartimes_by_detail(api_key, detail):
         "coordinates": detail["geometry"]["location"]
     }
 
-    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
+    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(
+        detail["name"], address
+    ))
 
     return detail_json
 
