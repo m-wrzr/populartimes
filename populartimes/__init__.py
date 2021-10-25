@@ -4,6 +4,7 @@
 from .crawler import run
 from .crawler import get_populartimes
 
+import warnings
 import logging
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
@@ -25,6 +26,9 @@ def get(api_key, types, p1, p2, n_threads=20, radius=180, all_places=False):
     :param all_places: bool; include/exclude places without populartimes
     :return: see readme
     """
+    warnings.warn("Method *get* will be removed soon, please use carefully.",
+                  DeprecationWarning, stacklevel=2)
+
     params = {
         "API_key": api_key,
         "radius": radius,
