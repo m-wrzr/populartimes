@@ -254,15 +254,11 @@ def get_populartimes_by_detail(detail):
         "coordinates": detail["geometry"]["location"]
     }
 
-<<<<<<< HEAD
-    return add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
-=======
     detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(
         detail["name"], address
     ))
 
     return detail_json
->>>>>>> master
 
 
 def check_response_code(resp):
