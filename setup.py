@@ -45,7 +45,9 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
-        'requests', 'geopy'
+        'requests>2,<3',
+        'geopy>=2,<3',
+        'urllib3>=1.21,<2',
     ],
     setup_requires=["pytest-runner", ],
     tests_require=["pytest", ],

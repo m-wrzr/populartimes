@@ -151,12 +151,15 @@ def add_optional_parameters(detail_json, detail, rating, rating_n, popularity, c
     return detail_json
 
 
-def get_populartimes_from_search(place_identifier):
+def get_populartimes_from_search(name, address):
     """
     request information for a place and parse current popularity
-    :param place_identifier: name and address string
+    :param name: name string
+    :param address: address string for checking if numbered address
     :return:
     """
+    place_identifier = "{} {}".format(name, address)
+
     params_url = {
         "tbm": "map",
         "tch": 1,
@@ -176,11 +179,7 @@ def get_populartimes_from_search(place_identifier):
     search_url = "https://www.google.de/search?" + "&".join(k + "=" + str(v) for k, v in params_url.items())
     logging.info("searchterm: " + search_url)
 
-    # noinspection PyUnresolvedReferences
-    gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
-    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=USER_AGENT),
-                                  context=gcontext)
+    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=USER_AGENT))
     data = resp.read().decode('utf-8').split('/*""*/')[0]
 
     # find eof json
@@ -191,8 +190,10 @@ def get_populartimes_from_search(place_identifier):
     jdata = json.loads(data)["d"]
     jdata = json.loads(jdata[4:])
 
-    # get info from result array, has to be adapted if backend api changes
-    info = index_get(jdata, 0, 1, 0, 14)
+    # check if proper and numeric address, i.e. multiple components and street number
+    is_proper_address = any(char.isspace() for char in address.strip()) and any(char.isdigit() for char in address)
+
+    info = index_get(jdata, 0, 1, 0 if is_proper_address else 1, 14)
 
     rating = index_get(info, 4, 7)
     rating_n = index_get(info, 4, 8)
@@ -245,8 +246,6 @@ def get_populartimes(api_key, place_id):
 def get_populartimes_by_detail(detail):
     address = detail["formatted_address"] if "formatted_address" in detail else detail.get("vicinity", "")
 
-    place_identifier = "{} {}".format(detail["name"], address)
-
     detail_json = {
         "id": detail["place_id"],
         "name": detail["name"],
@@ -255,7 +254,15 @@ def get_populartimes_by_detail(detail):
         "coordinates": detail["geometry"]["location"]
     }
 
+<<<<<<< HEAD
     return add_optional_parameters(detail_json, detail, *get_populartimes_from_search(place_identifier))
+=======
+    detail_json = add_optional_parameters(detail_json, detail, *get_populartimes_from_search(
+        detail["name"], address
+    ))
+
+    return detail_json
+>>>>>>> master
 
 
 def check_response_code(resp):
