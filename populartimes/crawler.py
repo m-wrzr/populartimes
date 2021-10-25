@@ -359,11 +359,7 @@ def get_populartimes_from_search(name, address):
     search_url = "https://www.google.de/search?" + "&".join(k + "=" + str(v) for k, v in params_url.items())
     logging.info("searchterm: " + search_url)
 
-    # noinspection PyUnresolvedReferences
-    gcontext = ssl.SSLContext(ssl.PROTOCOL_TLSv1)
-
-    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=USER_AGENT),
-                                  context=gcontext)
+    resp = urllib.request.urlopen(urllib.request.Request(url=search_url, data=None, headers=USER_AGENT))
     data = resp.read().decode('utf-8').split('/*""*/')[0]
 
     # find eof json
