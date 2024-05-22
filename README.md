@@ -3,7 +3,7 @@
 The goal of this library is to provide an option to use *Google Maps* popular times data, until it is available via Google's API. 
 For legal concerns please read [Issue #90](../../issues/90). 
 
-Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. The API call is SKU'd as "Find Current Place" with additional Data SKUs (Basic Data, Contact Data, Atmosphere Data).  As of February 2018, you can make 5000 calls with the alloted monthly budget.  For more information check https://developers.google.com/places/web-service/usage-and-billing and https://cloud.google.com/maps-platform/pricing/sheet/#places.  
+Keep in mind that this API uses the Google Places Web Service, where each API call over a monthly budget is priced. The API call is SKU'd as "Find Current Place" with additional Data SKUs (Basic Data, Contact Data, Atmosphere Data).  As of February 2018, you can make 5000 calls with the allotted monthly budget.  For more information check https://developers.google.com/places/web-service/usage-and-billing and https://cloud.google.com/maps-platform/pricing/sheet/#places.  
 
 As Google Maps is constantly updated this library can  be unstable.
 
